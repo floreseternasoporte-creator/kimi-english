@@ -229,7 +229,7 @@ nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card
 .qart{display:flex;align-items:center;justify-content:center;gap:16px;margin:4px 0 22px}
 .art-tile{width:120px;height:120px;border-radius:26px;background:var(--card);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);display:grid;place-items:center;overflow:hidden;color:var(--ink);animation:pop .35s}
 .art-tile .ic{width:84px;height:84px;stroke-width:1.8}
-.art-tile img.ic-img{width:100%;height:100%;object-fit:contain;vertical-align:0}
+.art-tile img.ic-img{width:82%;height:82%;object-fit:contain;vertical-align:0}
 .art-tile .num{font-family:var(--display);font-weight:800;font-size:64px;color:var(--coral)}
 .art-tile .swatch{width:74px;height:74px;border-radius:50%;border:3px solid var(--ink)}
 .say-bubble{position:relative;background:var(--card);border:2px solid var(--line2);border-radius:16px;padding:12px 16px;font-weight:700}
@@ -328,7 +328,7 @@ nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card
 .face.back{background:var(--deep);color:#fff;transform:rotateY(180deg);box-shadow:0 5px 0 #000}
 .face .art-tile{width:96px;height:96px;animation:none}
 .face .art-tile .ic{width:52px;height:52px}
-.face .art-tile img.ic-img{width:100%;height:100%;object-fit:contain}
+.face .art-tile img.ic-img{width:82%;height:82%;object-fit:contain}
 .face .art-tile .num{font-size:50px}
 .face .art-tile .swatch{width:58px;height:58px}
 .face .w{font-family:var(--display);font-size:32px;font-weight:800}
@@ -350,7 +350,7 @@ nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card
 .ditem .art-tile .ic{width:28px;height:28px}
 .ditem .art-tile .num{font-size:26px}
 .ditem .art-tile .swatch{width:30px;height:30px;border-width:2px}
-.ditem .art-tile img.ic-img{width:100%;height:100%;object-fit:contain}
+.ditem .art-tile img.ic-img{width:82%;height:82%;object-fit:contain}
 .ditem .dw{font-weight:800;font-size:17px}
 .ditem .dt{color:var(--soft);font-size:14px}
 .ditem .de{color:var(--mute);font-size:13px;font-style:italic}
@@ -2431,7 +2431,7 @@ let VOICE=null,VOICES=0;
 const CAN_SPEAK="speechSynthesis" in window;
 function pickVoice(){try{const v=speechSynthesis.getVoices();VOICES=v.filter(x=>/^en/i.test(x.lang)).length;VOICE=v.find(x=>/en-US/i.test(x.lang)&&/female|samantha|google|aria|jenny/i.test(x.name))||v.find(x=>/en-US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;}catch(e){}}
 if(CAN_SPEAK){pickVoice();try{speechSynthesis.addEventListener("voiceschanged",()=>{pickVoice();});}catch(e){}}
-const voicesOK=()=>CAN_SPEAK&&VOICES>0;
+const voicesOK=()=>elOK()||(CAN_SPEAK&&VOICES>0);
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition||null;
 function speak(text,slow){if(!voicesOK())return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="en-US";if(VOICE)u.voice=VOICE;u.rate=slow?0.55:(S.slow?0.72:0.92);speechSynthesis.speak(u);}catch(e){}}
 let AC=null;
@@ -4086,6 +4086,25 @@ speak=function(text,slow){if(!voicesOK())return;try{speechSynthesis.cancel();con
     /* si una voz en línea falla (sin internet), se usa una local para no quedarse mudo */
     u.onerror=ev=>{if(id!==_SPK||!ev||/cancel|interrupt/i.test(ev.error||""))return;const loc=voiceList().find(v=>v.localService&&v!==VOICE);if(loc){try{speechSynthesis.cancel();speechSynthesis.speak(mk(loc));}catch(e){}}};
     speechSynthesis.speak(u);}catch(e){}};
+/* ---------- voz ElevenLabs (Jessica) ---------- */
+const EL_VOICE="cgSgspJ2msm6clMCkdW9";const EL_VOICE_NAME="Jessica";
+function elKey(){try{return localStorage.getItem("kimi.elKey")||"";}catch(e){return "";}}
+function elOK(){return !!elKey();}
+let EL_AUDIO=null;const EL_CACHE=new Map();
+async function elSpeak(text,slow){const key=elKey();if(!key){speakSys(text,slow);return;}
+  const ck=text+"|"+(slow?1:0)+(S.slow?1:0);
+  try{if(EL_AUDIO){EL_AUDIO.pause();EL_AUDIO=null;}}catch(e){}
+  try{speechSynthesis.cancel();}catch(e){}
+  const vol=Math.max(.2,Math.min(1,(S.vol==null?80:S.vol)/100+.15));
+  const playUrl=u=>{try{EL_AUDIO=new Audio(u);EL_AUDIO.volume=vol;EL_AUDIO.play().catch(()=>{speakSys(text,slow);});}catch(e){speakSys(text,slow);}};
+  const cached=EL_CACHE.get(ck);if(cached){playUrl(cached);return;}
+  try{const r=await fetch("https://api.elevenlabs.io/v1/text-to-speech/"+EL_VOICE+"?output_format=mp3_44100_128",{method:"POST",headers:{"xi-api-key":key,"Content-Type":"application/json"},body:JSON.stringify({text:text,model_id:"eleven_multilingual_v2",voice_settings:{stability:0.5,similarity_boost:0.75,style:0,speed:slow?0.8:(S.slow?0.85:1)}})});
+    if(!r.ok)throw new Error("EL "+r.status);
+    const blob=await r.blob();const url=URL.createObjectURL(blob);EL_CACHE.set(ck,url);playUrl(url);}
+  catch(e){speakSys(text,slow);}}
+const speakSys=speak;
+speak=function(text,slow){if(elOK()){elSpeak(text,slow);return;}speakSys(text,slow);};
+
 /* ajuste de voz en el perfil */
 (function(){const row=document.createElement("div");row.className="setting voice-row";row.id="voiceRow";
   row.innerHTML=`<svg class="ic"><use href="#i-volume"/></svg><span class="lbl" id="voiceLbl">Voz</span><select id="voiceSel" class="vsel" aria-labelledby="voiceLbl"></select><button class="btn ghost vtest" id="voiceTest" type="button" aria-label="Probar voz"><svg class="ic"><use href="#i-volume"/></svg></button>`;
@@ -4098,6 +4117,15 @@ speak=function(text,slow){if(!voicesOK())return;try{speechSynthesis.cancel();con
   $("voiceSel").addEventListener("change",e=>{S.voiceName=e.target.value;save();pickVoice();speak("Hi! I'm Kimi. Let's practice English together.");});
   $("voiceTest").addEventListener("click",()=>speak("Hi! I'm Kimi. Let's practice English together."));
   paintVoice();const _rp=renderProfile;renderProfile=function(){_rp.apply(this,arguments);paintVoice();};})();
+(function(){const row=document.createElement("div");row.className="setting voice-row";row.id="elRow";
+  row.innerHTML=`<svg class="ic"><use href="#i-sparkle"/></svg><span class="lbl">Voz ElevenLabs</span><input type="password" id="elKeyInput" placeholder="Pega tu clave sk-…" autocomplete="off" spellcheck="false" style="flex:1;min-width:0;padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit"><button class="btn ghost vtest" id="elTestBtn" type="button" aria-label="Probar voz">Probar</button>`;
+  const vn=$("voiceNote");vn.parentNode.insertBefore(row,vn.nextSibling);
+  const note=document.createElement("p");note.className="voice-note";note.id="elNote";row.parentNode.insertBefore(note,row.nextSibling);
+  const inp=$("elKeyInput");
+  const paintEl=()=>{const k=elKey();inp.value=k;note.textContent=k?("Voz ElevenLabs lista: "+EL_VOICE_NAME+". Kimi habla con esa voz."):("Sin clave: Kimi usa la voz del teléfono. Pega tu clave de ElevenLabs para cambiarla.");};
+  inp.addEventListener("change",()=>{const v=inp.value.trim();try{if(v)localStorage.setItem("kimi.elKey",v);else localStorage.removeItem("kimi.elKey");}catch(e){}paintEl();if(v)speak("Hi! I'm Kimi. Let's practice English together.");});
+  $("elTestBtn").addEventListener("click",()=>speak("Hi! I'm Kimi. Let's practice English together."));
+  paintEl();})();
 const _fresh6=fresh;fresh=function(){return Object.assign(_fresh6(),{voiceName:""});};
 const _san6=sanitize;sanitize=function(x){const o=_san6(x);o.voiceName=typeof (x&&x.voiceName)==="string"?x.voiceName.slice(0,120):"";return o;};
 if(typeof S.voiceName!=="string")S.voiceName="";pickVoice();
