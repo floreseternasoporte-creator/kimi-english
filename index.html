@@ -148,6 +148,9 @@ nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card
 .tabs-in{display:flex;max-width:620px;margin:0 auto}
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px 12px;font-size:11.5px;font-weight:800;color:var(--mute);transition:color .2s;position:relative}
 .tab .ic{width:26px;height:26px;transition:transform .2s}
+.tab img.nav-img{width:26px;height:26px;object-fit:contain}
+.tab.on img.nav-img{transform:translateY(-2px)}
+.tab:not(.on) img.nav-img,.tab:not(.on) svg.ic{filter:grayscale(1);opacity:.55}
 .tab:hover{color:var(--soft)}
 .tab.on{color:var(--coral-t)}
 .tab.on .ic{transform:translateY(-2px)}
@@ -653,9 +656,6 @@ body:has(#lesson:not(.hidden)) .toast,body:has(#story:not(.hidden)) .toast{botto
   .section-head{flex-wrap:wrap}.section-head .jump{margin-left:0}
   .tiers{gap:4px}.tiers span{min-width:0;border-radius:9px}.tiers .ic{width:15px;height:15px}
   .tab{font-size:10.5px;padding:9px 1px 11px;min-width:0}.tab .ic{width:24px;height:24px}
-.tab img.nav-img{width:26px;height:26px;object-fit:contain}
-.tab.on img.nav-img{transform:translateY(-2px)}
-.tab:not(.on) img.nav-img,.tab:not(.on) svg.ic{filter:grayscale(1);opacity:.55}
   .topbar .chipstat{padding:7px 7px;font-size:14px}
   .setting{flex-wrap:wrap}
   .cert-grid{grid-template-columns:repeat(2,1fr)}
