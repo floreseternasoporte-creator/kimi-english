@@ -226,10 +226,10 @@ nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card
 .qlabel.retry{color:var(--berry-d);background:var(--berry-l)}
 .qprompt{font-size:clamp(22px,5.4vw,28px);font-weight:800;margin-bottom:18px}
 .qprompt b{color:var(--coral)}
-.qart{display:flex;align-items:center;gap:16px;margin:4px 0 22px}
-.art-tile{width:120px;height:120px;border-radius:26px;background:var(--card);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);display:grid;place-items:center;color:var(--ink);animation:pop .35s}
-.art-tile .ic{width:64px;height:64px;stroke-width:1.8}
-.art-tile img.ic-img{width:88px;height:88px;vertical-align:0}
+.qart{display:flex;align-items:center;justify-content:center;gap:16px;margin:4px 0 22px}
+.art-tile{width:120px;height:120px;border-radius:26px;background:var(--card);border:2px solid var(--line);box-shadow:0 4px 0 var(--line);display:grid;place-items:center;overflow:hidden;color:var(--ink);animation:pop .35s}
+.art-tile .ic{width:84px;height:84px;stroke-width:1.8}
+.art-tile img.ic-img{width:100%;height:100%;object-fit:contain;vertical-align:0}
 .art-tile .num{font-family:var(--display);font-weight:800;font-size:64px;color:var(--coral)}
 .art-tile .swatch{width:74px;height:74px;border-radius:50%;border:3px solid var(--ink)}
 .say-bubble{position:relative;background:var(--card);border:2px solid var(--line2);border-radius:16px;padding:12px 16px;font-weight:700}
@@ -328,7 +328,7 @@ nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card
 .face.back{background:var(--deep);color:#fff;transform:rotateY(180deg);box-shadow:0 5px 0 #000}
 .face .art-tile{width:96px;height:96px;animation:none}
 .face .art-tile .ic{width:52px;height:52px}
-.face .art-tile img.ic-img{width:72px;height:72px}
+.face .art-tile img.ic-img{width:100%;height:100%;object-fit:contain}
 .face .art-tile .num{font-size:50px}
 .face .art-tile .swatch{width:58px;height:58px}
 .face .w{font-family:var(--display);font-size:32px;font-weight:800}
@@ -350,6 +350,7 @@ nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card
 .ditem .art-tile .ic{width:28px;height:28px}
 .ditem .art-tile .num{font-size:26px}
 .ditem .art-tile .swatch{width:30px;height:30px;border-width:2px}
+.ditem .art-tile img.ic-img{width:100%;height:100%;object-fit:contain}
 .ditem .dw{font-weight:800;font-size:17px}
 .ditem .dt{color:var(--soft);font-size:14px}
 .ditem .de{color:var(--mute);font-size:13px;font-style:italic}
@@ -3024,16 +3025,16 @@ function showQ(){let q=adaptQ(L.qs[L.i]);if(q.t==="speak"&&!speakOK()){L.qs.spli
   let h=`<span class="qlabel${q.retry?" retry":""}">${ic(q.retry?"refresh":q.li)}${q.retry?"Repaso de un error":q.label}</span><h2 class="qprompt">${q.prompt}</h2>`;
   const playBtns=`<div class="qart"><button class="btn play" id="qPlay" aria-label="Reproducir">${ic("volume")}</button><button class="btn play slow" id="qSlow" aria-label="Reproducir lento">${ic("snail")}</button></div>`;
   if(q.t==="mc"){
-    if(q.kind==="pic")h+=`<div class="qart"><div class="art-tile">${art(q.w)}</div></div>`;
+    if(q.kind==="pic")h+=`<div class="qart"><div class="art-tile" style="width:180px;height:180px">${art(q.w)}</div></div>`;
     if(q.kind==="listen")h+=playBtns;
-    if(q.kind==="toEs")h+=`<div class="qart"><div class="art-tile">${art(q.w)}</div></div>`;
+    if(q.kind==="toEs")h+=`<div class="qart"><div class="art-tile" style="width:180px;height:180px">${art(q.w)}</div></div>`;
     if(q.kind==="toEs"&&voicesOK())h+=`<div class="qart"><button class="hear" id="qPlay" aria-label="Escuchar">${ic("volume")}</button></div>`;
     if(q.kind==="gram")h+=`<p class="sentence" lang="en">${esc(q.gram.s).replace("___",'<span class="slot empty" id="slot">____</span>')}</p><p class="hint">${esc(q.gram.es)}</p>`;
     if(q.kind==="reply")h+=`<div class="prompt-es">${mascot()}<div class="say-bubble" lang="en">${voicesOK()?`<button class="hear sm" id="qPlay" aria-label="Escuchar">${ic("volume")}</button>`:""}${esc(q.say)}</div></div>`;
     const enOpts=q.kind!=="toEs";
     h+=`<div class="opts${q.kind==="pic"?" grid2":""}">${q.opts.map((o,i)=>`<button class="opt" data-v="${esc(o)}"><span class="k" aria-hidden="true">${i+1}</span><span${enOpts?' lang="en"':""}>${esc(o)}</span></button>`).join("")}</div>`;}
   else if(q.t==="blank"){h+=`<p class="sentence" lang="en">${esc(q.sentence).replace("___",'<span class="slot empty" id="slot">____</span>')}</p><p class="hint">${esc(q.hint)}</p><div class="bank" lang="en">${q.bank.map(o=>`<button class="tok" data-v="${esc(o)}">${esc(o)}</button>`).join("")}</div>`;}
-  else if(q.t==="type"){h+=(q.kind==="dict"?playBtns:q.kind==="trans"?`<div class="prompt-es">${mascot()}<div class="say-bubble">${ic("message")} Frase completa</div></div>`:`<div class="qart"><div class="art-tile" style="width:84px;height:84px">${q.w.pic?art(q.w):ic("pencil")}</div></div>`)+`<textarea lang="en" class="type-box" id="typeBox" rows="2" placeholder="Escribe aquí en inglés" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Tu respuesta"></textarea>`;}
+  else if(q.t==="type"){h+=(q.kind==="dict"?playBtns:q.kind==="trans"?`<div class="prompt-es">${mascot()}<div class="say-bubble">${ic("message")} Frase completa</div></div>`:`<div class="qart"><div class="art-tile" style="width:160px;height:160px">${q.w.pic?art(q.w):ic("pencil")}</div></div>`)+`<textarea lang="en" class="type-box" id="typeBox" rows="2" placeholder="Escribe aquí en inglés" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Tu respuesta"></textarea>`;}
   else if(q.t==="match"){const L1=shuffle(q.pairs.map(w=>w.en)),R1=shuffle(q.pairs.map(w=>w.es));L.mDone=0;L.mSel=null;L.mMiss=0;
     h+=`<div class="match"><div class="col">${L1.map(x=>`<button class="opt mt" data-side="en" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div><div class="col">${R1.map(x=>`<button class="opt mt" data-side="es" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div></div>`;}
   else if(q.t==="order"){L.order=[];h+=`<div class="prompt-es">${mascot()}<div class="say-bubble">${esc(q.es)}</div></div><div class="answer-line" id="ansLine" lang="en" role="group" aria-label="Tu frase"></div><div class="bank" id="ordBank" lang="en">${q.bank.map((o,i)=>`<button class="tok" data-i="${i}">${esc(o)}</button>`).join("")}</div>`;}
@@ -4300,7 +4301,7 @@ if(typeof S.voiceName!=="string")S.voiceName="";pickVoice();
 @keyframes fxCheckPop{0%{transform:scale(0) rotate(-60deg)}100%{transform:none}}
 .l-foot.ok{animation:fxFootOk .5s ease}
 @keyframes fxFootOk{0%{filter:brightness(1.25)}100%{filter:none}}
-.art-tile{animation:pop .35s,fxFloaty 3.4s .4s ease-in-out infinite}
+.art-tile{animation:pop .35s}
 .play:not(.slow){animation:fxPlayPulse 2.2s ease-in-out infinite}
 @keyframes fxPlayPulse{0%,100%{box-shadow:0 4px 0 var(--bd),0 0 0 0 rgba(59,123,246,.4)}50%{box-shadow:0 4px 0 var(--bd),0 0 0 12px rgba(59,123,246,0)}}
 .combo-burst{animation:fxCombo 1.2s cubic-bezier(.2,1.6,.4,1) forwards!important}
