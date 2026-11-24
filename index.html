@@ -2428,13 +2428,8 @@ function art(w){if(w.i[0]==="#")return `<span class="num">${w.i.slice(1)}</span>
 function toast(msg,icon="sparkle"){const t=$("toast");if(!t)return;t.innerHTML=ic(icon)+"<span>"+msg+"</span>";t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),Math.max(2600,String(msg).length*55));}
 function hideToast(){$("toast").classList.remove("show");}
 /* voz */
-let VOICE=null,VOICES=0;
-const CAN_SPEAK="speechSynthesis" in window;
-function pickVoice(){try{const v=speechSynthesis.getVoices();VOICES=v.filter(x=>/^en/i.test(x.lang)).length;VOICE=v.find(x=>/en-US/i.test(x.lang)&&/female|samantha|google|aria|jenny/i.test(x.name))||v.find(x=>/en-US/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null;}catch(e){}}
-if(CAN_SPEAK){pickVoice();try{speechSynthesis.addEventListener("voiceschanged",()=>{pickVoice();});}catch(e){}}
-const voicesOK=()=>elOK()||(CAN_SPEAK&&VOICES>0);
+const voicesOK=()=>elOK();
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition||null;
-function speak(text,slow){if(!voicesOK())return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="en-US";if(VOICE)u.voice=VOICE;u.rate=slow?0.55:(S.slow?0.72:0.92);speechSynthesis.speak(u);}catch(e){}}
 let AC=null;
 function sfx(type){if(!S.sound)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();
   const seq={ok:[[659,0],[988,.09]],no:[[220,0],[175,.12]],win:[[523,0],[659,.1],[784,.2],[1047,.32]],tap:[[520,0]],chest:[[392,0],[523,.08],[659,.16],[880,.26]],coin:[[988,0],[1319,.07]]}[type]||[];
@@ -3131,7 +3126,7 @@ function setBar(p){const v=Math.round(p*100);$("lBar").style.width=v+"%";const p
 function nextQ(){if(L.mode==="lesson"&&S.hearts<=0){heartsOut(true);return;}
   if(L.mode==="jump"&&L.firstWrong>=3){closeLesson();modal(`${mascot("sad")}<h3>Esta vez no fue</h3><p class="sub">Fallaste 3 preguntas. Sigue la ruta normal o inténtalo más tarde: no perdiste nada.</p><button class="btn block" data-close>Vale</button>`);renderAll();return;}
   L.i++;if(L.i>=L.qs.length)finishLesson();else showQ();}
-function closeLesson(fromPop){$("lesson").classList.add("hidden");document.body.style.overflow="";if(L&&L.rushTimer){clearInterval(L.rushTimer);L.rushTimer=null;}if(REC)try{REC.abort();}catch(e){}try{speechSynthesis.cancel();}catch(e){}
+function closeLesson(fromPop){$("lesson").classList.add("hidden");document.body.style.overflow="";if(L&&L.rushTimer){clearInterval(L.rushTimer);L.rushTimer=null;}if(REC)try{REC.abort();}catch(e){}
   if(S.pending){S.pending=null;save();}if(!fromPop)popOverlayState();}
 function askQuit(){if(!L||L.i===0){closeLesson();renderAll();return;}
   modal(`${mascot("sad")}<h3>¿Seguro que quieres salir?</h3><p class="sub">Perderás el avance de ${L.mode==="lesson"?"esta lección":"esta sesión"}.</p><button class="btn block" data-close>Seguir aprendiendo</button><button class="btn ghost block" id="mQuit">Salir</button>`,{confirm:true});
@@ -3226,7 +3221,7 @@ function storyNext(){const s=ST.s,foot=$("sFoot"),btn=$("sNext");foot.className=
 function updStoryBar(){const s=ST.s;$("sBar").style.width=((ST.i+1+ST.qi)/(s.lines.length+s.qs.length)*100)+"%";}
 function scrollStory(){const b=$("sBody");setTimeout(()=>b.scrollTo({top:b.scrollHeight,behavior:"smooth"}),30);}
 $("sNext").addEventListener("click",storyNext);
-function closeStory(fromPop){$("story").classList.add("hidden");document.body.style.overflow="";try{speechSynthesis.cancel();}catch(e){}if(!fromPop)popOverlayState();}
+function closeStory(fromPop){$("story").classList.add("hidden");document.body.style.overflow="";if(!fromPop)popOverlayState();}
 $("sClose").addEventListener("click",()=>{closeStory();renderAll();});
 function finishStory(){const s=ST.s,first=!S.stories[s.id];closeStory();const secs=Math.round((Date.now()-ST.start)/1000);S.timeSec+=secs;const nd=bumpDay();
   S.stories[s.id]=true;questAdd("story");const gems=first?15:0;addGems(gems);const r=addXp(first?15:5);const ach=checkAch(true);save();
@@ -3380,9 +3375,8 @@ setInterval(dayWatch,60000);document.addEventListener("visibilitychange",()=>{if
 /* iOS: el audio solo se desbloquea dentro de un gesto del usuario */
 let AUDIO_UNLOCKED=false;
 document.addEventListener("pointerdown",()=>{if(AUDIO_UNLOCKED)return;AUDIO_UNLOCKED=true;try{if(S.sound){AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();}}catch(e){}
-  try{if(voicesOK()){const u=new SpeechSynthesisUtterance(" ");u.volume=0;speechSynthesis.speak(u);}}catch(e){}},{capture:true});
+},{capture:true});
 saveBanner();
-if(CAN_SPEAK){try{speechSynthesis.addEventListener("voiceschanged",()=>{if(!$("app").classList.contains("hidden")&&$("lesson").classList.contains("hidden")){renderPractice();}});}catch(e){}}
 try{history.replaceState({tab:"learn"},"");}catch(e){}
 </script>
 <script>
@@ -3965,7 +3959,7 @@ const KTOOLS={};
 <script>
 "use strict";
 /* =====================================================================
-   Kimi English v6 · zorrito Kimi nuevo, personajes, voz Microsoft, más animación
+   Kimi English v6 · zorrito Kimi nuevo, personajes, voz ElevenLabs, más animación
    ===================================================================== */
 const _shade=(hex,k)=>{const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;const f=k<0?0:255,t=Math.abs(k);
   r=Math.round(r+(f-r)*t);g=Math.round(g+(f-g)*t);b=Math.round(b+(f-b)*t);return "#"+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1);};
@@ -4063,73 +4057,33 @@ document.querySelectorAll(".mascot").forEach(m=>{const w=m.parentElement;if(w&&!
   document.addEventListener("click",e=>{const m=e.target.closest&&e.target.closest(".mascot");if(!m||m.closest("button"))return;m.classList.remove("poke");void m.getBoundingClientRect();m.classList.add("poke");
     try{sfx("tap");}catch(_){}setTimeout(()=>m.classList.remove("poke"),700);});})();
 
-/* =================== VOZ: estilo Microsoft (Natural) =================== */
-const MS_RANK=[/aria/i,/jenny/i,/ava\b|avamultilingual/i,/emma/i,/michelle/i,/sonia/i,/libby/i,/guy/i,/andrew/i,/brian/i,/ryan/i,/steffan/i,/eric/i,/christopher/i,/roger/i];
-const BAD_VOICE=/albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|junior|ralph|deranged|hysterical|pipe|princess|kathy|agnes/i;
-function voiceScore(v){const n=v.name||"",l=v.lang||"";if(!/^en/i.test(l)||BAD_VOICE.test(n))return -1;let s=0;
-  if(/microsoft/i.test(n))s+=200;if(/natural|online/i.test(n))s+=300;if(/multilingual/i.test(n))s+=10;
-  if(/en[-_]US/i.test(l))s+=40;else if(/en[-_]GB/i.test(l))s+=25;else s+=5;
-  const k=MS_RANK.findIndex(r=>r.test(n));if(k>=0)s+=60-k*3;
-  if(/google/i.test(n))s+=20;if(/samantha|karen|daniel|zira/i.test(n))s+=15;return s;}
-const isMS=v=>!!v&&/microsoft/i.test(v.name||"");
-const isNatural=v=>!!v&&/microsoft/i.test(v.name||"")&&/natural|online/i.test(v.name||"");
-function voiceList(){try{return speechSynthesis.getVoices().map(v=>[voiceScore(v),v]).filter(x=>x[0]>=0).sort((a,b)=>b[0]-a[0]).map(x=>x[1]);}catch(e){return [];}}
-function cleanVoice(v){return v.name.replace(/^Microsoft\s+/i,"").replace(/\s*-\s*English.*$/i,"").replace(/\s*Online\s*\(Natural\)/i," (Natural)").trim();}
-pickVoice=function(){try{const all=speechSynthesis.getVoices(),list=voiceList();VOICES=all.filter(x=>/^en/i.test(x.lang)).length;
-  const saved=S&&S.voiceName?list.find(v=>v.name===S.voiceName):null;VOICE=saved||list[0]||all.find(x=>/^en/i.test(x.lang))||null;}catch(e){}};
-pickVoice();
-if(CAN_SPEAK){let tries=0;const iv=setInterval(()=>{pickVoice();if(VOICE||++tries>20)clearInterval(iv);},250);
-  try{speechSynthesis.addEventListener("voiceschanged",()=>{pickVoice();if(typeof paintVoice==="function")paintVoice();});}catch(e){}}
-let _SPK=0;
-speak=function(text,slow){if(!voicesOK())return;try{speechSynthesis.cancel();const id=++_SPK;const mk=v=>{const u=new SpeechSynthesisUtterance(text);u.lang=(v&&v.lang)||"en-US";if(v)u.voice=v;
-    u.rate=slow?0.6:(S.slow?0.78:0.95);u.pitch=1;u.volume=Math.max(.2,Math.min(1,(S.vol==null?80:S.vol)/100+.15));return u;};
-    const u=mk(VOICE);
-    /* si una voz en línea falla (sin internet), se usa una local para no quedarse mudo */
-    u.onerror=ev=>{if(id!==_SPK||!ev||/cancel|interrupt/i.test(ev.error||""))return;const loc=voiceList().find(v=>v.localService&&v!==VOICE);if(loc){try{speechSynthesis.cancel();speechSynthesis.speak(mk(loc));}catch(e){}}};
-    speechSynthesis.speak(u);}catch(e){}};
-/* ---------- voz ElevenLabs (Jessica) ---------- */
+/* ---------- voz ElevenLabs (Jessica) — única voz de la app ---------- */
 const EL_VOICE="cgSgspJ2msm6clMCkdW9";const EL_VOICE_NAME="Jessica";
-function elKey(){try{return localStorage.getItem("kimi.elKey")||"";}catch(e){return "";}}
+const EL_KEY="sk_acaa9ae3e2f130b76e5f054db1eaef0e0091fce54b31a2ba";
+function elKey(){try{return localStorage.getItem("kimi.elKey")||EL_KEY;}catch(e){return EL_KEY;}}
 function elOK(){return !!elKey();}
 let EL_AUDIO=null;const EL_CACHE=new Map();
-async function elSpeak(text,slow){const key=elKey();if(!key){speakSys(text,slow);return;}
+async function elSpeak(text,slow){const key=elKey();if(!key)return;
   const ck=text+"|"+(slow?1:0)+(S.slow?1:0);
   try{if(EL_AUDIO){EL_AUDIO.pause();EL_AUDIO=null;}}catch(e){}
-  try{speechSynthesis.cancel();}catch(e){}
   const vol=Math.max(.2,Math.min(1,(S.vol==null?80:S.vol)/100+.15));
-  const playUrl=u=>{try{EL_AUDIO=new Audio(u);EL_AUDIO.volume=vol;EL_AUDIO.play().catch(()=>{speakSys(text,slow);});}catch(e){speakSys(text,slow);}};
+  const playUrl=u=>{try{EL_AUDIO=new Audio(u);EL_AUDIO.volume=vol;EL_AUDIO.play().catch(()=>{});}catch(e){}};
   const cached=EL_CACHE.get(ck);if(cached){playUrl(cached);return;}
   try{const r=await fetch("https://api.elevenlabs.io/v1/text-to-speech/"+EL_VOICE+"?output_format=mp3_44100_128",{method:"POST",headers:{"xi-api-key":key,"Content-Type":"application/json"},body:JSON.stringify({text:text,model_id:"eleven_multilingual_v2",voice_settings:{stability:0.5,similarity_boost:0.75,style:0,speed:slow?0.8:(S.slow?0.85:1)}})});
-    if(!r.ok)throw new Error("EL "+r.status);
+    if(!r.ok)return;
     const blob=await r.blob();const url=URL.createObjectURL(blob);EL_CACHE.set(ck,url);playUrl(url);}
-  catch(e){speakSys(text,slow);}}
-const speakSys=speak;
-speak=function(text,slow){if(elOK()){elSpeak(text,slow);return;}speakSys(text,slow);};
+  catch(e){}}
+function speak(text,slow){elSpeak(text,slow);}
 
-/* ajuste de voz en el perfil */
-(function(){const row=document.createElement("div");row.className="setting voice-row";row.id="voiceRow";
-  row.innerHTML=`<svg class="ic"><use href="#i-volume"/></svg><span class="lbl" id="voiceLbl">Voz</span><select id="voiceSel" class="vsel" aria-labelledby="voiceLbl"></select><button class="btn ghost vtest" id="voiceTest" type="button" aria-label="Probar voz"><svg class="ic"><use href="#i-volume"/></svg></button>`;
-  const after=$("swSlow").closest(".setting");after.parentNode.insertBefore(row,after);
-  const note=document.createElement("p");note.className="voice-note hidden";note.id="voiceNote";after.parentNode.insertBefore(note,after);
-  window.paintVoice=function(){const list=voiceList(),sel=$("voiceSel");if(!sel)return;
-    sel.innerHTML=list.length?list.map(v=>`<option value="${esc(v.name)}"${VOICE&&v.name===VOICE.name?" selected":""}>${isNatural(v)?"★ ":""}${esc(cleanVoice(v))} · ${esc(v.lang)}</option>`).join(""):`<option>Sin voces en inglés</option>`;
-    const n=$("voiceNote");const nat=list.some(isNatural);n.classList.toggle("hidden",nat||!list.length);
-    n.textContent=nat?"":"Las voces Microsoft Natural (Aria, Jenny, Guy…) salen en Microsoft Edge. Ábrelo ahí y Kimi las usará solas.";};
-  $("voiceSel").addEventListener("change",e=>{S.voiceName=e.target.value;save();pickVoice();speak("Hi! I'm Kimi. Let's practice English together.");});
-  $("voiceTest").addEventListener("click",()=>speak("Hi! I'm Kimi. Let's practice English together."));
-  paintVoice();const _rp=renderProfile;renderProfile=function(){_rp.apply(this,arguments);paintVoice();};})();
 (function(){const row=document.createElement("div");row.className="setting voice-row";row.id="elRow";
   row.innerHTML=`<svg class="ic"><use href="#i-sparkle"/></svg><span class="lbl">Voz ElevenLabs</span><input type="password" id="elKeyInput" placeholder="Pega tu clave sk-…" autocomplete="off" spellcheck="false" style="flex:1;min-width:0;padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit"><button class="btn ghost vtest" id="elTestBtn" type="button" aria-label="Probar voz">Probar</button>`;
-  const vn=$("voiceNote");vn.parentNode.insertBefore(row,vn.nextSibling);
+  const after2=$("swSlow").closest(".setting");after2.parentNode.insertBefore(row,after2.nextSibling);
   const note=document.createElement("p");note.className="voice-note";note.id="elNote";row.parentNode.insertBefore(note,row.nextSibling);
   const inp=$("elKeyInput");
   const paintEl=()=>{const k=elKey();inp.value=k;note.textContent=k?("Voz ElevenLabs lista: "+EL_VOICE_NAME+". Kimi habla con esa voz."):("Sin clave: Kimi usa la voz del teléfono. Pega tu clave de ElevenLabs para cambiarla.");};
   inp.addEventListener("change",()=>{const v=inp.value.trim();try{if(v)localStorage.setItem("kimi.elKey",v);else localStorage.removeItem("kimi.elKey");}catch(e){}paintEl();if(v)speak("Hi! I'm Kimi. Let's practice English together.");});
   $("elTestBtn").addEventListener("click",()=>speak("Hi! I'm Kimi. Let's practice English together."));
   paintEl();})();
-const _fresh6=fresh;fresh=function(){return Object.assign(_fresh6(),{voiceName:""});};
-const _san6=sanitize;sanitize=function(x){const o=_san6(x);o.voiceName=typeof (x&&x.voiceName)==="string"?x.voiceName.slice(0,120):"";return o;};
-if(typeof S.voiceName!=="string")S.voiceName="";pickVoice();
 </script>
 <!--FX-START-->
 <style id="fx7">
