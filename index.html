@@ -1034,6 +1034,10 @@ nav.tabs .tab.on .ic{animation:tabpop .35s cubic-bezier(.2,1.6,.4,1)}
 .badge-row{display:flex;align-items:center;gap:14px;padding:12px 14px;border-bottom:2px solid var(--line);text-align:left;width:100%;background:none}
 .badge-row:last-child{border-bottom:none}
 .badge-row svg.bdg{width:62px;height:70px;flex-shrink:0}
+.badge-row img.bdg-img{width:62px;height:70px;flex-shrink:0;object-fit:contain}
+.badge-row img.bdg-img.locked,.bd-art img.bdg-img.locked{filter:grayscale(1) brightness(.72);opacity:.55}
+.bd-art img.bdg-img.big{width:150px;height:170px;object-fit:contain}
+.cel-art img.bdg-img.big{width:100%;height:100%;object-fit:contain}
 .badge-row .bi{flex:1;min-width:0}
 .badge-row .bi b{font:900 16px var(--display);display:block}
 .badge-row .bi span{font-size:13px;color:var(--soft)}
@@ -2578,15 +2582,15 @@ function checkLeague(){const ws=weekStart(),wk=dayKey(ws);if(S.league.week===wk)
   S.league.week=wk;save();}
 /* ================= LOGROS ================= */
 const ACH=[
- {id:"streak",name:"Constancia",icon:"flame",c:"#F06A1D",lv:[3,7,30],m:()=>S.best,u:"días de racha"},
- {id:"xp",name:"Sabiduría",icon:"zap",c:"var(--sun-d)",lv:[100,500,2000],m:()=>S.xp,u:"XP"},
- {id:"words",name:"Vocabulario",icon:"bookopen",c:"var(--sky)",lv:[50,200,500],m:()=>S.seen.length,u:"palabras"},
- {id:"perfect",name:"Perfeccionista",icon:"crown",c:"var(--sun-d)",lv:[1,5,20],m:()=>S.perfect,u:"lecciones perfectas"},
- {id:"units",name:"Explorador",icon:"map",c:"var(--berry)",lv:[1,12,56],m:()=>unitsDone(),u:"unidades"},
- {id:"stories",name:"Lector",icon:"scroll",c:"var(--plum)",lv:[1,8,20],m:()=>Object.keys(S.stories).length,u:"historias"},
- {id:"goal",name:"Meta cumplida",icon:"target",c:"var(--teal)",lv:[1,7,30],m:()=>S.goalHits,u:"metas diarias"},
- {id:"league",name:"Competidor",icon:"shield",c:"var(--sky-d)",lv:[1,3,6],m:()=>S.league.maxTier,u:"ligas subidas"},
- {id:"speak",name:"Buena voz",icon:"mic",c:"var(--coral)",lv:[5,25,100],m:()=>S.spoken,u:"ejercicios de habla"}];
+ {id:"streak",img:"streak",name:"Constancia",icon:"flame",c:"#F06A1D",lv:[3,7,30],m:()=>S.best,u:"días de racha"},
+ {id:"xp",img:"xp",name:"Sabiduría",icon:"zap",c:"var(--sun-d)",lv:[100,500,2000],m:()=>S.xp,u:"XP"},
+ {id:"words",img:"words",name:"Vocabulario",icon:"bookopen",c:"var(--sky)",lv:[50,200,500],m:()=>S.seen.length,u:"palabras"},
+ {id:"perfect",img:"perfect",name:"Perfeccionista",icon:"crown",c:"var(--sun-d)",lv:[1,5,20],m:()=>S.perfect,u:"lecciones perfectas"},
+ {id:"units",img:"units",name:"Explorador",icon:"map",c:"var(--berry)",lv:[1,12,56],m:()=>unitsDone(),u:"unidades"},
+ {id:"stories",img:"stories",name:"Lector",icon:"scroll",c:"var(--plum)",lv:[1,8,20],m:()=>Object.keys(S.stories).length,u:"historias"},
+ {id:"goal",img:"goal",name:"Meta cumplida",icon:"target",c:"var(--teal)",lv:[1,7,30],m:()=>S.goalHits,u:"metas diarias"},
+ {id:"league",img:"league",name:"Competidor",icon:"shield",c:"var(--sky-d)",lv:[1,3,6],m:()=>S.league.maxTier,u:"ligas subidas"},
+ {id:"speak",img:"speak",name:"Buena voz",icon:"mic",c:"var(--coral)",lv:[5,25,100],m:()=>S.spoken,u:"ejercicios de habla"}];
 const achTier=a=>a.lv.filter(x=>a.m()>=x).length;
 function checkAch(quiet){const got=[];let gems=0;ACH.forEach(a=>{const t=achTier(a),old=S.achTier[a.id]||0;if(t>old){S.achTier[a.id]=t;addGems(10*t);gems+=10*t;got.push(a.name+" "+["","I","II","III"][t]);}});
   if(got.length){save();if(!quiet)setTimeout(()=>toast(`Logro: ${got.join(", ")} · +${gems} monedas`,"trophy"),400);}return {names:got,gems};}
@@ -3452,6 +3456,9 @@ function badgeSvg(color,icon,tier,locked){color=cssCol(color);const rim=TIER_C[l
    <path d="M31 10l19 10v21c0 9-8 16-19 19-11-3-19-10-19-19V20z" fill="${fill}"/><path d="M18 24q6-8 16-9" stroke="#fff" stroke-opacity=".45" stroke-width="3" fill="none" stroke-linecap="round"/>
    <svg x="19" y="22" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><use href="#i-${locked?"lock":icon}"/></svg>
    ${!locked&&tier?`<g fill="#FFE39A" stroke="#1E1B2E" stroke-width="1.6">${Array.from({length:tier},(_,i)=>`<circle cx="${31+(i-(tier-1)/2)*9}" cy="58" r="3.4"/>`).join("")}</g>`:""}</svg>`;}
+/* insignias ilustradas: PNG con transparencia; el SVG viejo queda de respaldo si la imagen falla */
+function badgeArt(a,tier,locked,big){const fb=badgeSvg(a.c,a.icon,tier,locked).replace('class="bdg"',big?'class="bdg" width="150" height="170"':'class="bdg"');
+  return `<img src="badges/${a.img}.png" alt="" class="bdg-img${locked?" locked":""}${big?" big":""}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display=''"><span style="display:none">${fb}</span>`;}
 
 /* ---------- confeti de verdad (canvas, física sencilla) ---------- */
 let FX_RAF=0;
@@ -3525,7 +3532,7 @@ function celShow(){const c=$("celebrate"),it=CEL_Q[CEL_I];if(!it){celHide();retu
   else if(it.k==="level"){const lv=levelInfo().lvl;h=`<div class="cel-art cel-in">${raysSvg("#FFFFFF")}<svg viewBox="0 0 120 120" width="170" height="170" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="#7B4FD8" stroke="#1E1B2E" stroke-width="5"/><circle cx="60" cy="60" r="40" fill="#9C7BEA"/><path d="M60 26l8 17 19 3-14 13 4 19-17-9-17 9 4-19-14-13 19-3z" fill="#FFE39A" stroke="#1E1B2E" stroke-width="3" stroke-linejoin="round"/></svg></div>
      <div class="big lv">${lv}</div><h2 id="celTitle">¡Subiste al nivel ${lv}!</h2><p class="cel-sub">+20 monedas. A este paso Kimi va a tener que estudiar para seguirte.</p>`;sfx("levelup");fxBurst();}
   else{const items=it.names.map(achByName).filter(x=>x.a);const first=items[0]||{a:ACH[0],t:1};
-    h=`<div class="cel-art cel-in">${raysSvg("#FFFFFF")}<div style="width:150px;height:170px">${badgeSvg(first.a.c,first.a.icon,first.t,false).replace('class="bdg"','class="bdg" width="150" height="170"')}</div></div>
+    h=`<div class="cel-art cel-in">${raysSvg("#FFFFFF")}<div style="width:150px;height:170px">${badgeArt(first.a,first.t,false,true)}</div></div>
      <h2 id="celTitle">${items.length>1?"¡Insignias nuevas!":"¡Insignia nueva!"}</h2><p class="cel-sub"><b>${esc(it.names.join(", "))}</b>${it.gems?` · +${it.gems} monedas`:""}<br>Ya está en tu colección del perfil.</p>`;sfx("badge");fxBurst("small");}
   const last=CEL_I>=CEL_Q.length-1;
   c.innerHTML=`<div class="cel-main">${h}</div><div class="cel-foot"><button class="btn block" id="celGo">${last?"Continuar":"Siguiente"}</button></div>`;c.classList.toggle("lg",it.k==="streak"&&S.streak>=30);
@@ -3615,17 +3622,17 @@ let BDG_ALL=[];
 function badgeDetail(i){const a=BDG_ALL[i];if(!a)return;const v=a.m(),t=a.lv.filter(x=>v>=x).length;
   const col=getComputedStyle(document.documentElement).getPropertyValue((a.c.match(/var\((--[a-z-]+)\)/)||[])[1]||"--x").trim()||a.c;
   const tiers=a.lv.map((x,k)=>`<li class="${v>=x?"on":""}"><span class="tb">${v>=x?ic("check"):k+1}</span><div><b>Nivel ${k+1}</b><span>${x} ${a.u}</span></div>${v>=x?'<em>Conseguido</em>':`<em>${Math.min(v,x)}/${x}</em>`}</li>`).join("");
-  modal(`<div class="bd-art">${badgeSvg(col,a.icon,t,!t).replace('class="bdg"','class="bdg" width="150" height="170"')}</div><h3>${esc(a.name)}</h3>
+  modal(`<div class="bd-art">${badgeArt(a,t,!t,true)}</div><h3>${esc(a.name)}</h3>
    <p class="sub">${t>=3?"Nivel máximo. Kimi ya no sabe qué más darte.":t?`Vas en el nivel ${t}. Te faltan <b>${a.lv[t]-v}</b> ${a.u} para el siguiente.`:`Todavía bloqueada. Consigue <b>${a.lv[0]}</b> ${a.u} y es tuya.`}</p>
    <ol class="bd-tiers">${tiers}</ol><button class="btn block" data-close>Continuar</button>`,{title:"Insignia"});}
 /* ---------- perfil: Kimi saluda, insignias ilustradas, ajustes nuevos ---------- */
 const _renderProfileV3=renderProfile;
 renderProfile=function(){_renderProfileV3.apply(this,arguments);$("pAvatar").innerHTML=mascot("wave");
-  const extra=[{name:"Duelista",icon:"zap",c:"var(--coral)",lv:[1,10,50],m:()=>S.duel.wins,u:"duelos ganados"},{name:"Rescatista",icon:"heartpulse",c:"var(--berry)",lv:[1,5,20],m:()=>S.rescue,u:"rescates"}];
+  const extra=[{name:"Duelista",img:"duelista",icon:"zap",c:"var(--coral)",lv:[1,10,50],m:()=>S.duel.wins,u:"duelos ganados"},{name:"Rescatista",img:"rescatista",icon:"heartpulse",c:"var(--berry)",lv:[1,5,20],m:()=>S.rescue,u:"rescates"}];
   const all=[...ACH,...extra];let got=0;
   $("pAchs").className="badges";$("pAchs").innerHTML=all.map(a=>{const t=a.lv.filter(x=>a.m()>=x).length,v=a.m(),next=a.lv[Math.min(t,2)],prev=t?a.lv[t-1]:0,p=t>=3?1:Math.max(0,Math.min(1,(v-prev)/(next-prev)));got+=t;
     const col=getComputedStyle(document.documentElement).getPropertyValue((a.c.match(/var\((--[a-z-]+)\)/)||[])[1]||"--x").trim()||a.c;
-    BDG_ALL=all;return `<button type="button" class="badge-row" data-bdg="${all.indexOf(a)}">${badgeSvg(col,a.icon,t,!t)}<div class="bi"><span class="lvtag">${t?"Nivel "+t:"Bloqueada"}</span><b>${a.name}</b><span>${t>=3?"¡Nivel máximo! Kimi se quita el sombrero.":Math.min(v,next)+" de "+next+" "+a.u}</span><div class="apb"><i style="width:${p*100}%"></i></div></div>${ic("chevr")}</button>`;}).join("");
+    BDG_ALL=all;return `<button type="button" class="badge-row" data-bdg="${all.indexOf(a)}">${badgeArt(a,t,!t)}<div class="bi"><span class="lvtag">${t?"Nivel "+t:"Bloqueada"}</span><b>${a.name}</b><span>${t>=3?"¡Nivel máximo! Kimi se quita el sombrero.":Math.min(v,next)+" de "+next+" "+a.u}</span><div class="apb"><i style="width:${p*100}%"></i></div></div>${ic("chevr")}</button>`;}).join("");
   $("pAchs").querySelectorAll("[data-bdg]").forEach(b=>b.addEventListener("click",()=>badgeDetail(+b.dataset.bdg)));
   const h=$("pAchs").previousElementSibling;if(h&&h.classList.contains("h-mini"))h.innerHTML=`${ic("trophy")}Insignias · ${got} de ${all.length*3}`;
   $("volRange").value=S.vol;$("volRange").setAttribute("aria-valuetext",S.vol+"%");$("volRow").classList.toggle("dim",!S.sound);$("swHaptic").setAttribute("aria-checked",S.haptics);};
