@@ -1496,6 +1496,8 @@ body:has(#modal.full:not(.hidden)) .toast,body:has(#settings:not(.hidden)) .toas
         <div class="card" style="margin-top:14px"><h3 class="h-mini" style="margin-top:0"><svg class="ic" style="color:#F06A1D"><use href="#i-flame"/></svg>Esta semana</h3><div class="week" id="pWeek"></div></div>
         <h3 class="h-mini"><svg class="ic"><use href="#i-trophy"/></svg>Logros</h3>
         <div class="achs" id="pAchs"></div>
+        <h3 class="h-mini"><svg class="ic"><use href="#i-users"/></svg>Amigos</h3>
+        <div id="pFriends"></div>
         
       </section>
     </main>
@@ -2450,7 +2452,7 @@ let LAST_CLOUD_SNAPSHOT="";
 function fresh(){return {v:3,rev:0,session:false,mode:"account",name:"Aprendiz",goal:20,onboarded:false,motive:null,when:null,startLevel:0,xp:0,gems:100,hearts:HEART_MAX,heartsAt:null,
   streak:0,best:0,lastDay:null,days:[],frozenDays:[],freezes:0,daily:{day:null,xp:0},xpLog:{},done:{},chests:{},stories:{},seen:[],known:[],srs:{},
   lessons:0,perfect:0,goalHits:0,spoken:0,answers:{ok:0,total:0},timeSec:0,sound:true,slow:false,speak:true,listen:true,theme:"auto",skin:"coral",skins:["coral"],
-  boostUntil:0,noSpeakUntil:0,noListenUntil:0,quests:{day:null,list:[],bonus:false},league:{tier:0,week:null,maxTier:0,last:null},achTier:{},pending:null,finished:false,created:Date.now()};}
+  boostUntil:0,noSpeakUntil:0,noListenUntil:0,quests:{day:null,list:[],bonus:false},league:{tier:0,week:null,maxTier:0,last:null},achTier:{},pending:null,finished:false,created:Date.now(),friends:[],cheered:{},dailyChest:{day:null,streak:0,days:[]}};}
 /* Revisa tipos y rangos: un dato corrupto nunca debe romper la app */
 function sanitize(o){const f=fresh();const out=(o&&typeof o==="object"&&!Array.isArray(o))?o:{};
   const num=(k,min,max,int=true)=>{let v=Number(out[k]);if(!isFinite(v))v=f[k];v=Math.min(max,Math.max(min,v));out[k]=int?Math.round(v):v;};
@@ -2465,14 +2467,15 @@ function sanitize(o){const f=fresh();const out=(o&&typeof o==="object"&&!Array.i
   if(out.heartsAt!==null){const h=Number(out.heartsAt);out.heartsAt=isFinite(h)&&h>0?h:null;}
   const dk=v=>typeof v==="string"&&/^\d{4}-\d\d-\d\d$/.test(v);
   if(!dk(out.lastDay))out.lastDay=null;
-  arr("days",dk);arr("frozenDays",dk);arr("seen",x=>typeof x==="string");arr("known",x=>typeof x==="string");arr("skins",x=>SKINS.some(k=>k.id===x));
+  arr("days",dk);arr("frozenDays",dk);arr("seen",x=>typeof x==="string");arr("known",x=>typeof x==="string");arr("skins",x=>SKINS.some(k=>k.id===x));arr("friends",x=>typeof x==="string");
   if(!out.skins.includes("coral"))out.skins.unshift("coral");if(!out.skins.includes(out.skin))out.skin="coral";
-  ["done","chests","stories","srs","xpLog","achTier","answers","daily","quests","league"].forEach(obj);
+  ["done","chests","stories","srs","xpLog","achTier","answers","daily","quests","league","cheered","dailyChest"].forEach(obj);
   Object.keys(out.xpLog).forEach(k=>{const v=Number(out.xpLog[k]);if(!dk(k)||!isFinite(v)||v<0)delete out.xpLog[k];else out.xpLog[k]=Math.round(v);});
   Object.keys(out.done).forEach(k=>{if(!out.done[k]||typeof out.done[k]!=="object")out.done[k]={stars:1};});
   Object.keys(out.srs).forEach(k=>{const r=out.srs[k];if(!r||typeof r!=="object")delete out.srs[k];else ["s","due","n","bad"].forEach(x=>{r[x]=Number(r[x])||0;});});
   out.answers={ok:Math.max(0,Number(out.answers.ok)||0),total:Math.max(0,Number(out.answers.total)||0)};
   out.daily={day:dk(out.daily.day)?out.daily.day:null,xp:Math.max(0,Number(out.daily.xp)||0)};
+  out.dailyChest=Object.assign({day:null,streak:0,days:[]},out.dailyChest);if(!dk(out.dailyChest.day))out.dailyChest.day=null;out.dailyChest.streak=Math.max(0,Number(out.dailyChest.streak)||0);if(!Array.isArray(out.dailyChest.days))out.dailyChest.days=[];out.dailyChest.days=out.dailyChest.days.filter(dk).slice(-90);
   if(!Array.isArray(out.quests.list)||!out.quests.list.every(q=>q&&typeof q==="object"&&typeof q.t==="string"))out.quests=f.quests;
   out.league=Object.assign(f.league,out.league);const tier=Number(out.league.tier);out.league.tier=Number.isInteger(tier)&&tier>=0&&tier<=9?tier:0;
   out.league.maxTier=Math.min(9,Math.max(out.league.tier,Number(out.league.maxTier)||0));if(out.league.week!==null&&!dk(out.league.week))out.league.week=null;
@@ -2997,7 +3000,9 @@ function startPractice(kind){let words;
   if(kind==="grammar"||kind==="foryou"){const open=UNITS.map((u,i)=>i).filter(i=>unitOpen(i));units=kind==="foryou"?forYouUnits().filter(i=>unitOpen(i)):open;if(!units.length)units=open;
     const uw=ALL.filter(w=>units.includes(w.unit));const sw=uw.filter(w=>S.seen.includes(w.en));words=sw.length>=4?sw:uw;}
   if(kind==="listen"&&!listenOK()){toast("Tu navegador no tiene voz en inglés disponible","info");return;}
+  if(kind==="rush"){const seen=ALL.filter(w=>S.seen.includes(w.en));const pool=(seen.length>=4?seen:ALL).slice();for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}L={mode:"practice",kind,qs:buildPractice(pool,"quick").slice(0,40),rushLeft:60};beginLesson();startRushTimer();return;}
   L={mode:"practice",kind,qs:buildPractice(words,kind,units)};beginLesson();}
+function startRushTimer(){if(L.rushTimer)clearInterval(L.rushTimer);L.rushTimer=setInterval(()=>{if(!L||L.kind!=="rush"||$("lesson").classList.contains("hidden")){clearInterval(L.rushTimer);L.rushTimer=null;return;}L.rushLeft--;if(L.rushLeft<=0){clearInterval(L.rushTimer);L.rushTimer=null;toast("¡Tiempo!","clock");finishLesson();}else lessonHearts();},1000);}
 function startPlacement(){L={mode:"placement",qs:[],sec:SECTIONS.map(()=>0)};SECTIONS.slice(0,4).forEach((s,si)=>{const us=[];for(let u=s.from;u<=s.to;u++)us.push(u);const q=buildTest(us,4).slice(0,5);q.forEach(x=>x.sec=si);L.qs.push(...q);});beginLesson();}
 function jumpIntro(si){const sec=SECTIONS[si];modal(`<div style="display:grid;place-items:center;color:var(--sky);margin-bottom:6px">${ic("skip").replace('class="ic','style="width:56px;height:56px" class="ic')}</div><h3>¿Saltar a la Sección ${si+1}?</h3><p class="sub">Responde 12 preguntas de las secciones anteriores. Si fallas 3, la prueba termina (no pierdes vidas). Si apruebas, se desbloquea <b>${sec.title}</b>.</p><button class="btn sky block" id="mJump">Empezar prueba</button><button class="btn ghost block" data-close>Ahora no</button>`,{confirm:true});
   $("mJump").addEventListener("click",()=>{closeModal();const us=[];for(let u=0;u<sec.from;u++)us.push(u);L={mode:"jump",si,qs:buildTest(us,10).slice(0,12)};beginLesson();});}
@@ -3005,7 +3010,8 @@ function beginLesson(){Object.assign(L,{i:0,total0:L.qs.length,firstWrong:0,corr
   L.qs.forEach(q=>{if(q.w)L.words.add(q.w.en);if(q.pairs)q.pairs.forEach(w=>L.words.add(w.en));});hideToast();
   $("lesson").classList.remove("hidden");document.body.style.overflow="hidden";pushNav({ov:1});showQ();}
 const noHearts=()=>L.mode!=="lesson";
-function lessonHearts(){const el=$("lHeart");el.setAttribute("role","img");el.setAttribute("aria-label",L.mode==="lesson"?`${S.hearts} ${S.hearts===1?"vida":"vidas"}`:L.mode==="jump"?`${Math.max(0,3-L.firstWrong)} intentos`:L.mode==="placement"?"Prueba de nivel, sin vidas":"Práctica, sin vidas");if(L.mode==="lesson")el.innerHTML=`${ic("heart","fill")}<span>${S.hearts}</span>`;
+function lessonHearts(){const el=$("lHeart");
+  if(L.kind==="rush"){const s=Math.max(0,L.rushLeft||0);el.setAttribute("aria-label","Quedan "+s+" segundos");el.innerHTML=`${ic("clock","fill")}<span>${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span>`;return;}el.setAttribute("role","img");el.setAttribute("aria-label",L.mode==="lesson"?`${S.hearts} ${S.hearts===1?"vida":"vidas"}`:L.mode==="jump"?`${Math.max(0,3-L.firstWrong)} intentos`:L.mode==="placement"?"Prueba de nivel, sin vidas":"Práctica, sin vidas");if(L.mode==="lesson")el.innerHTML=`${ic("heart","fill")}<span>${S.hearts}</span>`;
   else if(L.mode==="jump")el.innerHTML=`${ic("heart","fill")}<span>${Math.max(0,3-L.firstWrong)}</span>`;
   else el.innerHTML=`${ic(L.mode==="placement"?"compass":"dumbbell")}<span>${L.mode==="placement"?"Prueba":"Práctica"}</span>`;}
 function adaptQ(q){if((q.kind==="listen"||q.kind==="dict")&&!listenOK()){const n=q.kind==="dict"?qType(q.w):qToEn(q.w,UNITS[q.w.unit].words);n.retry=q.retry;return n;}
@@ -3123,7 +3129,7 @@ function setBar(p){const v=Math.round(p*100);$("lBar").style.width=v+"%";const p
 function nextQ(){if(L.mode==="lesson"&&S.hearts<=0){heartsOut(true);return;}
   if(L.mode==="jump"&&L.firstWrong>=3){closeLesson();modal(`${mascot("sad")}<h3>Esta vez no fue</h3><p class="sub">Fallaste 3 preguntas. Sigue la ruta normal o inténtalo más tarde: no perdiste nada.</p><button class="btn block" data-close>Vale</button>`);renderAll();return;}
   L.i++;if(L.i>=L.qs.length)finishLesson();else showQ();}
-function closeLesson(fromPop){$("lesson").classList.add("hidden");document.body.style.overflow="";if(REC)try{REC.abort();}catch(e){}try{speechSynthesis.cancel();}catch(e){}
+function closeLesson(fromPop){$("lesson").classList.add("hidden");document.body.style.overflow="";if(L&&L.rushTimer){clearInterval(L.rushTimer);L.rushTimer=null;}if(REC)try{REC.abort();}catch(e){}try{speechSynthesis.cancel();}catch(e){}
   if(S.pending){S.pending=null;save();}if(!fromPop)popOverlayState();}
 function askQuit(){if(!L||L.i===0){closeLesson();renderAll();return;}
   modal(`${mascot("sad")}<h3>¿Seguro que quieres salir?</h3><p class="sub">Perderás el avance de ${L.mode==="lesson"?"esta lección":"esta sesión"}.</p><button class="btn block" data-close>Seguir aprendiendo</button><button class="btn ghost block" id="mQuit">Salir</button>`,{confirm:true});
@@ -3146,8 +3152,8 @@ function finishLesson(){closeLesson();const secs=Math.round((Date.now()-L.start)
     for(let u=0;u<(skip?SECTIONS[skip].from:0);u++)completeUnit(u);xp=10;title=skip?`¡Empiezas en la Sección ${skip+1}!`:"¡Prueba terminada!";
     sub=skip?`Desbloqueamos ${SECTIONS[skip].from} unidades que ya dominas. Puedes repetirlas cuando quieras.`:"Te conviene empezar desde el principio para asentar las bases. ¡Vamos!";}
   else if(L.mode==="jump"){for(let u=0;u<SECTIONS[L.si].from;u++)completeUnit(u);xp=20;gems=20;title="¡Prueba superada!";sub=`Se desbloqueó la Sección ${L.si+1}: ${SECTIONS[L.si].title}.`;}
-  else if(L.mode==="practice"){xp=L.kind==="refill"?5:8;questAdd("practice");let got=0;if(L.kind==="refill"){regen();got=Math.min(2,HEART_MAX-S.hearts);S.hearts+=got;if(S.hearts>=HEART_MAX)S.heartsAt=null;}
-    title=L.kind==="refill"?(got?`+${got} vidas`:"¡Práctica terminada!"):"¡Práctica terminada!";sub=L.kind==="refill"?(got?`Ahora tienes ${S.hearts} de ${HEART_MAX}. Cada práctica de recuperación devuelve 2.`:"Ya tenías todas tus vidas."):"Repasar es la forma más rápida de no olvidar.";}
+  else if(L.mode==="practice"){xp=L.kind==="rush"?Math.max(4,L.correct*2):L.kind==="refill"?5:8;questAdd("practice");let got=0;if(L.kind==="refill"){regen();got=Math.min(2,HEART_MAX-S.hearts);S.hearts+=got;if(S.hearts>=HEART_MAX)S.heartsAt=null;}
+    title=L.kind==="rush"?"¡Desafío terminado!":L.kind==="refill"?(got?`+${got} vidas`:"¡Práctica terminada!"):"¡Práctica terminada!";sub=L.kind==="refill"?(got?`Ahora tienes ${S.hearts} de ${HEART_MAX}. Cada práctica de recuperación devuelve 2.`:"Ya tenías todas tus vidas."):"Repasar es la forma más rápida de no olvidar.";}
   else{const prev=S.done[L.key];replay=!!(prev&&!prev.skip);
     /* repetir una lección da poco XP y ninguna moneda: así no se "farmea" la economía */
     if(replay){xp=5+(L.best>=8?3:0);gems=0;}else{xp=10+(stars===3?5:0)+(L.n==="review"?10:0)+(L.best>=8?3:0);gems=5+(stars===3?5:0)+(L.n==="review"?10:0);}
@@ -3236,6 +3242,7 @@ function renderPractice(){DIRTY.delete("practice");document.querySelectorAll("[d
    {id:"grammar",icon:"bulb",c:"var(--plum)",t:"Gramática y diálogos",d:"Formas correctas, respuestas y frases"},
    {id:"smart",icon:"brain",c:"var(--berry)",t:"Repaso inteligente",d:due||weak?`${due} pendientes · ${weak} débiles`:S.seen.length?"Refuerza lo aprendido":"Haz una lección primero",dis:!S.seen.length&&!weak},
    {id:"quick",icon:"zap",c:"var(--sun-d)",t:"Práctica rápida",d:"7 ejercicios mezclados"},
+   {id:"rush",icon:"clock",c:"var(--coral)",t:"Desafío relámpago",d:"60 segundos · todo el XP que puedas"},
    {id:"listen",icon:"headphones",c:"var(--sky)",t:"Solo oído",d:voicesOK()?"Escucha y dictado":"Tu navegador no tiene voz en inglés",dis:!voicesOK()},
    {id:"speak",icon:"mic",c:"var(--coral)",t:"Pronunciación",d:SR?"Habla y te corregimos":"Repite en voz alta"},
    {id:"refill",icon:"heart",c:"var(--teal)",t:"Recuperar vidas",d:S.hearts<HEART_MAX?"Practica y recupera 2 vidas":"Tienes todas tus vidas",dis:S.hearts>=HEART_MAX},
@@ -3647,10 +3654,24 @@ renderProfile=function(){_renderProfileV3.apply(this,arguments);$("pAvatar").inn
     BDG_ALL=all;return `<button type="button" class="badge-row" data-bdg="${all.indexOf(a)}">${badgeArt(a,t,!t)}<div class="bi"><span class="lvtag">${t?"Nivel "+t:"Bloqueada"}</span><b>${a.name}</b><span>${t>=3?"¡Nivel máximo! Kimi se quita el sombrero.":Math.min(v,next)+" de "+next+" "+a.u}</span><div class="apb"><i style="width:${p*100}%"></i></div></div>${ic("chevr")}</button>`;}).join("");
   $("pAchs").querySelectorAll("[data-bdg]").forEach(b=>b.addEventListener("click",()=>badgeDetail(+b.dataset.bdg)));
   const h=$("pAchs").previousElementSibling;if(h&&h.classList.contains("h-mini"))h.innerHTML=`${ic("trophy")}Insignias · ${got} de ${all.length*3}`;
+  renderFriends();
   $("volRange").value=S.vol;$("volRange").setAttribute("aria-valuetext",S.vol+"%");$("volRow").classList.toggle("dim",!S.sound);$("swHaptic").setAttribute("aria-checked",S.haptics);};
 $("volRange").addEventListener("input",e=>{S.vol=+e.target.value;e.target.setAttribute("aria-valuetext",S.vol+"%");});
 $("volRange").addEventListener("change",()=>{save();if(!S.sound){S.sound=true;renderProfile();}sfx("ok");});
 $("swHaptic").addEventListener("click",()=>{S.haptics=!S.haptics;save();renderProfile();if(S.haptics)buzz("correct");});
+
+/* ---------- amigos (personajes de práctica, como los rivales de liga) ---------- */
+function friendXp(name,wk){const ws=weekStart(),now=Date.now(),frac=Math.min(1,Math.max(.02,(now-ws.getTime())/(7*864e5)));const r=rng(hash(wk+"|"+name));return Math.round((30+r()*300)*Math.pow(frac,.85));}
+function friendStreak(name){const r=rng(hash("st|"+name));return 1+Math.floor(r()*45);}
+function renderFriends(){const host=$("pFriends");if(!host)return;const wk=dayKey(weekStart());
+  const followed=(S.friends||[]).filter(n=>RIVALS.includes(n));
+  const sug=RIVALS.filter(n=>!followed.includes(n)).slice(0,4);
+  const row=(n,fol)=>{const xp=friendXp(n,wk),st=friendStreak(n),ch=S.cheered[n]===dayKey(),i=RIVALS.indexOf(n);
+    return `<div class="badge-row"><span class="av" style="background:${AVC[i%AVC.length]};width:44px;height:44px;font-size:18px;border-radius:50%;display:grid;place-items:center;font-weight:900;color:#fff;flex-shrink:0">${esc(n[0])}</span><div class="bi"><b>${esc(n)}</b><span>${xp} XP esta semana · ${st} días de racha</span></div>${fol?`<button class="btn ghost" data-cheer="${esc(n)}"${ch?" disabled":""}>${ch?"¡Animado!":"Animar"}</button><button class="btn ghost" data-unfollow="${esc(n)}" aria-label="Dejar de seguir a ${esc(n)}">✕</button>`:`<button class="btn sun" data-follow="${esc(n)}">Seguir</button>`}</div>`;};
+  host.innerHTML=`<div class="badges" style="margin-bottom:8px">${followed.length?followed.map(n=>row(n,true)).join(""):`<p class="sub" style="padding:14px">Aún no sigues a nadie. Sigue a tus primeros amigos para ver su XP semanal.</p>`}</div>${sug.length?`<h3 class="h-mini" style="margin-top:6px">${ic("users")}Descubrir</h3><div class="badges">${sug.map(n=>row(n,false)).join("")}</div>`:""}<p class="fine">${ic("info")}<span>Son personajes de práctica, como los rivales de la liga.</span></p>`;
+  host.querySelectorAll("[data-follow]").forEach(b=>b.addEventListener("click",()=>{if(!S.friends.includes(b.dataset.follow))S.friends.push(b.dataset.follow);save();renderFriends();}));
+  host.querySelectorAll("[data-unfollow]").forEach(b=>b.addEventListener("click",()=>{S.friends=S.friends.filter(n=>n!==b.dataset.unfollow);save();renderFriends();}));
+  host.querySelectorAll("[data-cheer]").forEach(b=>b.addEventListener("click",()=>{const n=b.dataset.cheer;if(S.cheered[n]===dayKey())return;S.cheered[n]=dayKey();addXp(5);save();try{sfx("ok");}catch(e){}toast("Le mandaste ánimos a "+n+" · +5 XP","heart");renderFriends();}));}
 
 /* ---------- ajustes: pantalla completa propia ---------- */
 let SET_OPENER=null;
@@ -4343,6 +4364,14 @@ if(typeof S.voiceName!=="string")S.voiceName="";pickVoice();
 @keyframes fxGradMove{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
 @keyframes fxPlayPulse2{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.4)}50%{box-shadow:0 0 0 10px rgba(255,255,255,0)}}
 .weekstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:10px 8px}
+.daily-chest{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:2px solid var(--line);border-radius:18px;padding:10px 14px;background:var(--card);cursor:pointer;color:var(--ink);font-family:inherit}
+.daily-chest .dc-ic{width:46px;flex-shrink:0;display:grid;place-items:center}
+.daily-chest svg.chest-art{width:46px;height:38px}
+.daily-chest b{font:900 16px var(--display);display:block}
+.daily-chest span{font-size:13px;color:var(--soft)}
+.daily-chest.open{opacity:.75;cursor:default}
+.daily-chest .dc-go{margin-left:auto;font:900 13px var(--display);color:var(--sun-d);white-space:nowrap}
+.badge-row .btn{flex-shrink:0;padding:8px 12px;font-size:13px}
 .weekstrip .wd{display:grid;justify-items:center;gap:3px;animation:fxCellIn .5s calc(var(--i)*70ms + .2s) cubic-bezier(.2,1.7,.4,1) both}
 .weekstrip .wd em{font:800 11px var(--body);font-style:normal;color:var(--soft)}
 .weekstrip .wd .ic,.weekstrip .wd .dot{width:26px;height:26px}
@@ -4506,7 +4535,15 @@ function renderDaily(){
   const b=card.querySelector(".wotd");
   b.addEventListener("click",e=>{WOTD_OPEN=!WOTD_OPEN;if(e.target.closest(".wotd-spk")||WOTD_OPEN){try{speak(w.en);}catch(_){}}DAILY_KEY="";renderDaily();
     const r=card.querySelector(".wotd");r.classList.add("flip");setTimeout(()=>r.classList.remove("flip"),600);});
+  renderDailyChest(card);
 }
+function renderDailyChest(card){let dc=document.getElementById("dailyChest");if(!dc){dc=document.createElement("button");dc.id="dailyChest";dc.className="daily-chest";dc.type="button";card.after(dc);}
+  const opened=S.dailyChest.day===dayKey();dc.classList.toggle("open",opened);
+  dc.innerHTML=`<span class="dc-ic">${chestSvg(opened)}</span><div><b>Cofre diario</b><span>${opened?`Abierto hoy · Racha de ${S.dailyChest.streak} ${S.dailyChest.streak===1?"día":"días"}`:"Toca para abrir tu recompensa de hoy"}</span></div><span class="dc-go">${opened?"Mañana":"Abrir"}</span>`;
+  dc.onclick=()=>{if(S.dailyChest.day===dayKey()){toast("Ya abriste el cofre de hoy. Vuelve mañana.","info");return;}openDailyChest();};}
+function openDailyChest(){const t=dayKey(),y=new Date();y.setDate(y.getDate()-1);const cont=S.dailyChest.day===dayKey(y);S.dailyChest.streak=cont?S.dailyChest.streak+1:1;S.dailyChest.day=t;if(!S.dailyChest.days.includes(t))S.dailyChest.days.push(t);S.dailyChest.days=S.dailyChest.days.slice(-90);
+  const g=10+Math.floor(Math.random()*16);addGems(g);addXp(5);bumpDay();save();sfx("chest");DAILY_KEY="";renderDaily();
+  modal(`<div style="display:grid;place-items:center;margin-bottom:8px">${chestSvg(true)}</div><h3>¡Cofre diario abierto!</h3><p class="sub">Ganaste <b>+${g} monedas</b> y <b>+5 XP</b>.<br>Racha de cofres: <b>${S.dailyChest.streak} ${S.dailyChest.streak===1?"día":"días"}</b>. Vuelve mañana por otro.</p><button class="btn block" data-close>Seguir</button>`);}
 const _rs2=renderStats;
 renderStats=function(){_rs2.apply(this,arguments);try{renderDaily();}catch(e){}};
 
