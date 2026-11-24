@@ -2423,7 +2423,7 @@ function mascot(mood="happy",skin){const sk=SKINS.find(x=>x.id===(skin||(window.
    ${brows}<g class="eyes"><ellipse cx="45" cy="52" rx="7" ry="9" fill="#1E1B2E"/><ellipse cx="75" cy="52" rx="7" ry="9" fill="#1E1B2E"/>
    <circle cx="47.5" cy="48.5" r="2.6" fill="#fff"/><circle cx="77.5" cy="48.5" r="2.6" fill="#fff"/></g>
    <ellipse cx="33" cy="66" rx="6" ry="4" fill="${sk.h}"/><ellipse cx="87" cy="66" rx="6" ry="4" fill="${sk.h}"/>${mouth}</svg>`;}
-const ASSET_V="20261124c";
+const ASSET_V="20261124d";
 function art(w){if(w.i[0]==="#")return `<span class="num">${w.i.slice(1)}</span>`;if(w.i[0]==="@")return `<span class="swatch" style="background:${w.i.slice(1)}"></span>`;return `<img src="icons/${w.i}.png?v=${ASSET_V}" alt="" class="ic-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display=''"><span style="display:none">${ic(w.i)}</span>`;}
 function toast(msg,icon="sparkle"){const t=$("toast");if(!t)return;t.innerHTML=ic(icon)+"<span>"+msg+"</span>";t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),Math.max(2600,String(msg).length*55));}
 function hideToast(){$("toast").classList.remove("show");}
@@ -4053,18 +4053,22 @@ document.querySelectorAll(".mascot").forEach(m=>{const w=m.parentElement;if(w&&!
   document.addEventListener("click",e=>{const m=e.target.closest&&e.target.closest(".mascot");if(!m||m.closest("button"))return;m.classList.remove("poke");void m.getBoundingClientRect();m.classList.add("poke");
     try{sfx("tap");}catch(_){}setTimeout(()=>m.classList.remove("poke"),700);});})();
 
-/* ---------- voz ElevenLabs (Jessica) — única voz de la app ---------- */
-const EL_VOICE="cgSgspJ2msm6clMCkdW9";const EL_VOICE_NAME="Jessica";
+/* ---------- voz ElevenLabs (Laura) — única voz de la app ---------- */
+const EL_VOICE="FGY2WhTYpPnrIDTdsKH5";const EL_VOICE_NAME="Laura";
 const EL_KEY="sk_acaa9ae3e2f130b76e5f054db1eaef0e0091fce54b31a2ba";
 function elKey(){try{return localStorage.getItem("kimi.elKey")||EL_KEY;}catch(e){return EL_KEY;}}
 function elOK(){return !!elKey();}
 let EL_AUDIO=null;const EL_CACHE=new Map();
+function fnv1a(t){let h=0x811c9dc5;for(let i=0;i<t.length;i++){h^=t.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}return ("0000000"+h.toString(16)).slice(-8);}
+let AUDIO_MANIFEST=null,AUDIO_MANIFEST_P=null;
+function loadAudioManifest(){if(AUDIO_MANIFEST_P)return AUDIO_MANIFEST_P;AUDIO_MANIFEST_P=fetch("audio/manifest.json?v="+ASSET_V).then(r=>r.ok?r.json():{}).then(j=>{AUDIO_MANIFEST=j;return j;}).catch(()=>{AUDIO_MANIFEST={};return AUDIO_MANIFEST;});return AUDIO_MANIFEST_P;}
 async function elSpeak(text,slow){const key=elKey();if(!key)return;
   const ck=text+"|"+(slow?1:0)+(S.slow?1:0);
   try{if(EL_AUDIO){EL_AUDIO.pause();EL_AUDIO=null;}}catch(e){}
   const vol=Math.max(.2,Math.min(1,(S.vol==null?80:S.vol)/100+.15));
   const playUrl=u=>{try{EL_AUDIO=new Audio(u);EL_AUDIO.volume=vol;EL_AUDIO.play().catch(()=>{});}catch(e){}};
   const cached=EL_CACHE.get(ck);if(cached){playUrl(cached);return;}
+  if(!slow&&!S.slow){try{const m=await loadAudioManifest();const h=fnv1a(text);if(m[h]){const u="audio/"+h+".mp3?v="+ASSET_V;EL_CACHE.set(ck,u);playUrl(u);return;}}catch(e){}}
   try{const r=await fetch("https://api.elevenlabs.io/v1/text-to-speech/"+EL_VOICE+"?output_format=mp3_44100_128",{method:"POST",headers:{"xi-api-key":key,"Content-Type":"application/json"},body:JSON.stringify({text:text,model_id:"eleven_multilingual_v2",voice_settings:{stability:0.5,similarity_boost:0.75,style:0,speed:slow?0.8:(S.slow?0.85:1)}})});
     if(!r.ok)return;
     const blob=await r.blob();const url=URL.createObjectURL(blob);EL_CACHE.set(ck,url);playUrl(url);}
