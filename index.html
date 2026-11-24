@@ -375,6 +375,8 @@ nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
 .stat{display:flex;align-items:center;gap:12px;padding:14px}
 .stat .ic{width:28px;height:28px}
+.stat img.stat-img{width:40px;height:40px;object-fit:contain;flex-shrink:0}
+.h-mini img.stat-img{width:26px;height:26px;object-fit:contain;flex-shrink:0;vertical-align:-6px}
 .stat b{font-family:var(--display);font-size:24px;display:block;line-height:1}
 .stat span{font-size:12.5px;color:var(--soft);font-weight:700}
 .week{display:flex;justify-content:space-between;gap:6px}
@@ -1251,7 +1253,7 @@ body:has(#modal.full:not(.hidden)) .toast,body:has(#settings:not(.hidden)) .toas
 <symbol id="i-train" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M12 3v8M8 21l2-4M16 21l-2-4M8 14h.01M16 14h.01"/></symbol>
 <symbol id="i-city" viewBox="0 0 24 24"><path d="M3 21h18M5 21V9l5-3v15M10 21V3h6v18M16 21V10h3v11M13 7h.01M13 11h.01M13 15h.01"/></symbol>
 
-<symbol id="i-gem" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="5.2"/></symbol>
+<symbol id="i-gem" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="none"/><circle cx="12" cy="12" r="5.2" fill="none"/><image href="icons/coin.png" x="0" y="0" width="24" height="24"/></symbol>
 <symbol id="i-pot" viewBox="0 0 24 24"><path d="M2 10h20M4 10v7a4 4 0 0 0 4 4h8a4 4 0 0 0 4-4v-7M8 6c0-1 1-2 1-3M12 6c0-1 1-2 1-3M16 6c0-1 1-2 1-3"/></symbol>
 <symbol id="i-bath" viewBox="0 0 24 24"><path d="M2 12h20v3a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5zM6 12V5a2 2 0 0 1 4 0M7 20l-1 2M17 20l1 2"/></symbol>
 <symbol id="i-table" viewBox="0 0 24 24"><path d="M2 8h20M4 8v12M20 8v12M4 14h16"/></symbol>
@@ -1484,7 +1486,7 @@ body:has(#modal.full:not(.hidden)) .toast,body:has(#settings:not(.hidden)) .toas
         <div class="cta" id="pCert"><svg class="ic"><use href="#i-trophy"/></svg><div><b>¡Ruta completada!</b><p>Terminaste todas las unidades.</p></div><button class="btn sun" id="certBtn">Ver certificado</button></div>
         
         <div class="stats" id="pStats"></div>
-        <div class="card"><h3 class="h-mini" style="margin-top:0"><svg class="ic" style="color:var(--sun-d)"><use href="#i-chart"/></svg>XP de los últimos 7 días</h3><div class="chart" id="pChart"></div><div class="mini-stats" id="pMini"></div></div>
+        <div class="card"><h3 class="h-mini" style="margin-top:0"><img src="icons/chart.png" class="stat-img" alt="">XP de los últimos 7 días</h3><div class="chart" id="pChart"></div><div class="mini-stats" id="pMini"></div></div>
         <div class="card" style="margin-top:14px"><h3 class="h-mini" style="margin-top:0"><svg class="ic" style="color:#F06A1D"><use href="#i-flame"/></svg>Esta semana</h3><div class="week" id="pWeek"></div></div>
         <h3 class="h-mini"><svg class="ic"><use href="#i-trophy"/></svg>Logros</h3>
         <div class="achs" id="pAchs"></div>
@@ -3320,7 +3322,7 @@ function renderProfile(){DIRTY.delete("profile");const l=levelInfo();
   $("pLvl").textContent="Nivel "+l.lvl;$("pLvlTxt").textContent=l.into+"/"+l.need+" XP";$("pLvlBar").style.width=(l.into/l.need*100)+"%";
   $("pCert").classList.toggle("hidden",!S.finished);
   $("pStats").innerHTML=[["flame",streakAlive(),"Racha actual","#F06A1D",1],["trophy",S.best,"Mejor racha","var(--sun-d)"],["zap",S.xp,"XP total","var(--sun-d)",1],["bookopen",S.seen.length,"Palabras vistas","var(--sky)"],["check",S.lessons,"Lecciones","var(--teal)"],["map",unitsDone()+"/"+UNITS.length,"Unidades","var(--berry)"]]
-   .map(s=>`<div class="card stat"><span style="color:${s[3]}">${ic(s[0],s[4]?"fill":"")}</span><div><b>${s[1]}</b><span>${s[2]}</span></div></div>`).join("");
+   .map(s=>`<div class="card stat"><span style="color:${s[3]}">${statIc(s[0])}</span><div><b>${s[1]}</b><span>${s[2]}</span></div></div>`).join("");
   const days=[];for(let i=6;i>=0;i--){const d=dayOff(-i);days.push({k:dayKey(d),l:["D","L","M","X","J","V","S"][d.getDay()],v:S.xpLog[dayKey(d)]||0,t:i===0});}
   const mx=Math.max(S.goal,...days.map(d=>d.v));$("pChart").innerHTML=days.map(d=>`<div class="col"><span class="v">${d.v||""}</span><div class="bar2${d.t?" today":""}" style="height:${Math.max(3,d.v/mx*100)}%"></div><span class="d">${d.l}</span></div>`).join("");
   const wk=days.reduce((a,d)=>a+d.v,0),acc=S.answers.total?Math.round(S.answers.ok/S.answers.total*100):0,mins=Math.round(S.timeSec/60);
@@ -3459,6 +3461,9 @@ function badgeSvg(color,icon,tier,locked){color=cssCol(color);const rim=TIER_C[l
 /* insignias ilustradas: PNG con transparencia; el SVG viejo queda de respaldo si la imagen falla */
 function badgeArt(a,tier,locked,big){const fb=badgeSvg(a.c,a.icon,tier,locked).replace('class="bdg"',big?'class="bdg" width="150" height="170"':'class="bdg"');
   return `<img src="badges/${a.img}.png" alt="" class="bdg-img${locked?" locked":""}${big?" big":""}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display=''"><span style="display:none">${fb}</span>`;}
+/* iconos ilustrados de Perfil: PNG con transparencia; si falta la imagen, cae al SVG de línea */
+const STAT_ICONS={flame:1,trophy:1,zap:1,bookopen:1,check:1,map:1};
+function statIc(n){return STAT_ICONS[n]?`<img src="icons/${n}.png" alt="" class="stat-img" loading="lazy">`:ic(n);}
 
 /* ---------- confeti de verdad (canvas, física sencilla) ---------- */
 let FX_RAF=0;
