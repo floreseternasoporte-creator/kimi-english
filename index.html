@@ -4071,15 +4071,7 @@ async function elSpeak(text,slow){const key=elKey();if(!key)return;
   catch(e){}}
 function speak(text,slow){elSpeak(text,slow);}
 
-(function(){const row=document.createElement("div");row.className="setting voice-row";row.id="elRow";
-  row.innerHTML=`<svg class="ic"><use href="#i-sparkle"/></svg><span class="lbl">Voz ElevenLabs</span><input type="password" id="elKeyInput" placeholder="Pega tu clave sk-…" autocomplete="off" spellcheck="false" style="flex:1;min-width:0;padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font:inherit"><button class="btn ghost vtest" id="elTestBtn" type="button" aria-label="Probar voz">Probar</button>`;
-  const after2=$("swSlow").closest(".setting");after2.parentNode.insertBefore(row,after2.nextSibling);
-  const note=document.createElement("p");note.className="voice-note";note.id="elNote";row.parentNode.insertBefore(note,row.nextSibling);
-  const inp=$("elKeyInput");
-  const paintEl=()=>{const k=elKey();inp.value=k;note.textContent=k?("Voz ElevenLabs lista: "+EL_VOICE_NAME+". Kimi habla con esa voz."):("Sin clave: Kimi usa la voz del teléfono. Pega tu clave de ElevenLabs para cambiarla.");};
-  inp.addEventListener("change",()=>{const v=inp.value.trim();try{if(v)localStorage.setItem("kimi.elKey",v);else localStorage.removeItem("kimi.elKey");}catch(e){}paintEl();if(v)speak("Hi! I'm Kimi. Let's practice English together.");});
-  $("elTestBtn").addEventListener("click",()=>speak("Hi! I'm Kimi. Let's practice English together."));
-  paintEl();})();
+
 </script>
 <!--FX-START-->
 <style id="fx7">
