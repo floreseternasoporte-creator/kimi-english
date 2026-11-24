@@ -3406,10 +3406,7 @@ function sndDecode(){if(SND_DEC)return SND_DEC;try{AC=AC||new(window.AudioContex
     const p=AC.decodeAudioData(u.buffer,buf=>{SBUF[k]=buf;res();},()=>res());if(p&&p.catch)p.catch(()=>res());}catch(e){res();}})));return SND_DEC;}
 const BUZZ={correct:12,combo:[10,30,10],wrong:[30,40,30],heart:45,complete:[20,40,60],streak:[30,50,30,50,80],levelup:[20,40,20,40,90],chest:[15,30,60],badge:[20,30,40],league:[20,40,20,40,90]};
 function buzz(k){if(!S.haptics||!navigator.vibrate)return;const p=BUZZ[k];if(p)try{navigator.vibrate(p);}catch(e){}}
-sfx=function(type){const k=SND_ALIAS[type]||type;buzz(k);if(!S.sound||!SND[k])return;const vol=Math.max(0,Math.min(1,(S.vol==null?80:S.vol)/100))*(k==="tap"?.55:1);if(vol<=0)return;
-  try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume().catch(()=>{});
-    if(SBUF[k]){const s=AC.createBufferSource(),g=AC.createGain();s.buffer=SBUF[k];g.gain.value=vol;s.connect(g).connect(AC.destination);s.start();return;}
-    sndDecode();const a=new Audio(SND[k]);a.volume=vol;const p=a.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}};
+sfx=function(type){const k=SND_ALIAS[type]||type;buzz(k);if(!S.sound)return;const vol=Math.max(0,Math.min(1,(S.vol==null?80:S.vol)/100))*(type==="tap"?.55:1);if(vol<=0)return;try{const a=new Audio("sfx/"+type+".mp3?v="+ASSET_V);a.volume=vol;const p=a.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}};
 document.addEventListener("pointerdown",()=>{if(S.sound)sndDecode();},{capture:true,once:true});
 document.addEventListener("keydown",()=>{if(S.sound)sndDecode();},{capture:true,once:true});
 /* toques suaves en elementos de elección */
