@@ -2423,7 +2423,8 @@ function mascot(mood="happy",skin){const sk=SKINS.find(x=>x.id===(skin||(window.
    ${brows}<g class="eyes"><ellipse cx="45" cy="52" rx="7" ry="9" fill="#1E1B2E"/><ellipse cx="75" cy="52" rx="7" ry="9" fill="#1E1B2E"/>
    <circle cx="47.5" cy="48.5" r="2.6" fill="#fff"/><circle cx="77.5" cy="48.5" r="2.6" fill="#fff"/></g>
    <ellipse cx="33" cy="66" rx="6" ry="4" fill="${sk.h}"/><ellipse cx="87" cy="66" rx="6" ry="4" fill="${sk.h}"/>${mouth}</svg>`;}
-function art(w){if(w.i[0]==="#")return `<span class="num">${w.i.slice(1)}</span>`;if(w.i[0]==="@")return `<span class="swatch" style="background:${w.i.slice(1)}"></span>`;return `<img src="icons/${w.i}.png" alt="" class="ic-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display=''"><span style="display:none">${ic(w.i)}</span>`;}
+const ASSET_V="20261124c";
+function art(w){if(w.i[0]==="#")return `<span class="num">${w.i.slice(1)}</span>`;if(w.i[0]==="@")return `<span class="swatch" style="background:${w.i.slice(1)}"></span>`;return `<img src="icons/${w.i}.png?v=${ASSET_V}" alt="" class="ic-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display=''"><span style="display:none">${ic(w.i)}</span>`;}
 function toast(msg,icon="sparkle"){const t=$("toast");if(!t)return;t.innerHTML=ic(icon)+"<span>"+msg+"</span>";t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),Math.max(2600,String(msg).length*55));}
 function hideToast(){$("toast").classList.remove("show");}
 /* voz */
@@ -3479,7 +3480,7 @@ function badgeArt(a,tier,locked,big){const fb=badgeSvg(a.c,a.icon,tier,locked).r
   return `<img src="badges/${a.img}.png" alt="" class="bdg-img${locked?" locked":""}${big?" big":""}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display=''"><span style="display:none">${fb}</span>`;}
 /* iconos ilustrados de Perfil: PNG con transparencia; si falta la imagen, cae al SVG de línea */
 const STAT_ICONS={flame:1,trophy:1,zap:1,bookopen:1,check:1,map:1};
-function statIc(n){return STAT_ICONS[n]?`<img src="icons/${n}.png" alt="" class="stat-img" loading="lazy">`:ic(n);}
+function statIc(n){return STAT_ICONS[n]?`<img src="icons/${n}.png?v=${ASSET_V}" alt="" class="stat-img" loading="lazy">`:ic(n);}
 
 /* ---------- confeti de verdad (canvas, física sencilla) ---------- */
 let FX_RAF=0;
