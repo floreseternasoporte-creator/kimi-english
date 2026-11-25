@@ -663,7 +663,7 @@ body:has(#lesson:not(.hidden)) .toast,body:has(#story:not(.hidden)) .toast{botto
 }
 /* móvil en horizontal: todo más compacto para que la lección quepa sin scroll */
 @media (max-height:500px) and (orientation:landscape){
-  .l-top{padding:6px 16px}.l-body{padding-top:6px}
+  .l-top{padding:calc(10px + env(safe-area-inset-top)) 16px 6px}.l-body{padding-top:6px}
   .qart .art-tile{width:72px!important;height:72px!important}.qprompt{font-size:20px;margin-bottom:8px}
   .prompt-es .mascot{display:none}.l-foot-in{padding:8px 20px calc(8px + env(safe-area-inset-bottom))}
   .l-foot .btn{padding:12px 18px}
@@ -1608,11 +1608,11 @@ const UNITS=[
   sents:[["I have two dogs","Tengo dos perros."],["I am ten years old","Tengo diez años."],["Three apples please","Tres manzanas, por favor."]]},
  {title:"Familia",desc:"La gente que más quieres",color:"plum",icon:"users",
   tip:{title:"Mi, tu, su... en inglés",body:"<b>my</b> (mi), <b>your</b> (tu), <b>his</b> (su, de él), <b>her</b> (su, de ella), <b>our</b> (nuestro). Ojo: en inglés distinguimos si el dueño es hombre o mujer.",ex:[["my mother","mi madre"],["his sister","su hermana (de él)"],["her son","su hijo (de ella)"],["our family","nuestra familia"]]},
-  words:[W("mother","madre","user","My mother cooks well.","Mi madre cocina bien.",1,["mom","mum"]),W("father","padre","user","My father works hard.","Mi padre trabaja mucho.",1,["dad"]),
-   W("sister","hermana","user","My sister sings.","Mi hermana canta.",1),W("brother","hermano","user","My brother plays soccer.","Mi hermano juega fútbol.",1),
-   W("baby","bebé","baby","The baby sleeps.","El bebé duerme."),W("grandmother","abuela","user","My grandmother tells stories.","Mi abuela cuenta historias.",1),
+  words:[W("mother","madre","woman","My mother cooks well.","Mi madre cocina bien.",1,["mom","mum"]),W("father","padre","man","My father works hard.","Mi padre trabaja mucho.",1,["dad"]),
+   W("sister","hermana","girl","My sister sings.","Mi hermana canta.",1),W("brother","hermano","user","My brother plays soccer.","Mi hermano juega fútbol.",1),
+   W("baby","bebé","baby","The baby sleeps.","El bebé duerme."),W("grandmother","abuela","grandmother","My grandmother tells stories.","Mi abuela cuenta historias.",1),
    W("family","familia","users","I love my family.","Amo a mi familia."),W("son","hijo","user","Her son is tall.","Su hijo es alto.",1),
-   W("daughter","hija","user","His daughter is a doctor.","Su hija es doctora.",1)],
+   W("daughter","hija","girl","His daughter is a doctor.","Su hija es doctora.",1)],
   sents:[["My mother cooks well","Mi madre cocina bien."],["Her son is tall","Su hijo es alto."],["I love my family","Amo a mi familia."]]},
  {title:"Colores",desc:"Pinta tus frases",color:"berry",icon:"palette",
   tip:{title:"El color va antes",body:"En inglés el adjetivo va <b>antes</b> del sustantivo: <b>a red car</b>, no <i>a car red</i>. Y los colores nunca cambian en plural: <b>red cars</b>.",ex:[["a red car","un carro rojo"],["a black cat","un gato negro"],["blue eyes","ojos azules"]]},
@@ -1677,15 +1677,15 @@ const UNITS_B=[
  {title:"Animales",desc:"Del gato al elefante",color:"teal",icon:"paw",
   tip:{title:"Plurales rebeldes",body:"Casi todo forma el plural con <b>-s</b>, pero hay rebeldes: <b>mouse</b> pasa a <b>mice</b>, <b>fish</b> se queda <b>fish</b>, <b>child</b> pasa a <b>children</b> y <b>person</b> a <b>people</b>.",ex:[["one mouse, two mice","un ratón, dos ratones"],["one fish, two fish","un pez, dos peces"],["one child, two children","un niño, dos niños"]]},
   words:[W("bird","pájaro","bird","The bird sings in the morning.","El pájaro canta por la mañana."),W("fish","pez","fish","Fish live in water.","Los peces viven en el agua."),
-   W("horse","caballo","paw","The horse is strong.","El caballo es fuerte.",1),W("cow","vaca","paw","The cow gives milk.","La vaca da leche.",1),
-   W("rabbit","conejo","paw","The rabbit eats carrots.","El conejo come zanahorias.",1),W("lion","león","paw","The lion sleeps a lot.","El león duerme mucho.",1),
-   W("elephant","elefante","paw","The elephant is huge.","El elefante es enorme.",1),W("mouse","ratón","paw","The mouse is small.","El ratón es pequeño.",1)],
+   W("horse","caballo","horse","The horse is strong.","El caballo es fuerte.",1),W("cow","vaca","cow","The cow gives milk.","La vaca da leche.",1),
+   W("rabbit","conejo","rabbit","The rabbit eats carrots.","El conejo come zanahorias.",1),W("lion","león","lion","The lion sleeps a lot.","El león duerme mucho.",1),
+   W("elephant","elefante","elephant","The elephant is huge.","El elefante es enorme.",1),W("mouse","ratón","mouse","The mouse is small.","El ratón es pequeño.",1)],
   sents:[["The bird can fly","El pájaro puede volar."],["I have two fish","Tengo dos peces."],["The horse runs fast","El caballo corre rápido."]]},
  {title:"Cuerpo y salud",desc:"Cuando algo te duele",color:"sky",icon:"heartpulse",
   tip:{title:"Me duele... = My ... hurts",body:"Para decir que algo te duele usa <b>my</b> + parte del cuerpo + <b>hurts</b>: <b>My head hurts</b>. En inglés se dice <b>my</b>, no <i>the</i>.",ex:[["My head hurts","Me duele la cabeza"],["My arm hurts","Me duele el brazo"],["I need a doctor","Necesito un médico"]]},
-  words:[W("head","cabeza","user","My head hurts.","Me duele la cabeza.",1),W("hand","mano","hand","Raise your hand.","Levanta la mano."),
+  words:[W("head","cabeza","head","My head hurts.","Me duele la cabeza.",1),W("hand","mano","hand","Raise your hand.","Levanta la mano."),
    W("eye","ojo","eye","Close one eye.","Cierra un ojo."),W("mouth","boca","message","Open your mouth.","Abre la boca.",1),
-   W("arm","brazo","user","My arm is strong.","Mi brazo es fuerte.",1),W("leg","pierna","footprints","My left leg hurts.","Me duele la pierna izquierda.",1),
+   W("arm","brazo","arm","My arm is strong.","Mi brazo es fuerte.",1),W("leg","pierna","footprints","My left leg hurts.","Me duele la pierna izquierda.",1),
    W("doctor","médico","hospital","The doctor is kind.","El médico es amable."),W("medicine","medicina","pill","Take your medicine.","Toma tu medicina.")],
   sents:[["My head hurts","Me duele la cabeza."],["I need a doctor","Necesito un médico."],["Wash your hands","Lávate las manos."]]},
  {title:"El clima",desc:"Lluvia, sol y estaciones",color:"plum",icon:"cloud",
@@ -1778,7 +1778,7 @@ const OOPS=["Casi","No era esa","Revísala con calma","Ojo con esta","Se repasar
 const G=(s,a,d,es)=>({s,a,d,es}), C=(p,a,d,es)=>({p,a,d,es});
 const EXT={
 "Primeros pasos":{tag:"general",words:[W("sun","sol","sun","The sun is very big.","El sol es muy grande."),W("tree","árbol","tree","There is a tree in my garden.","Hay un árbol en mi jardín."),
-  W("girl","niña","user","The girl has a cat.","La niña tiene un gato.",1),W("boy","niño","user","The boy reads a book.","El niño lee un libro.",1)],
+  W("girl","niña","girl","The girl has a cat.","La niña tiene un gato.",1),W("boy","niño","user","The boy reads a book.","El niño lee un libro.",1)],
  gram:[G("I eat ___ apple.","an",["a","the a"],"Yo como una manzana."),G("She has ___ dog.","a",["an","two"],"Ella tiene un perro."),G("This ___ my house.","is",["are","am"],"Esta es mi casa.")],
  chat:[C("Is this your book?","Yes, it is.",["Yes, I am.","No, she is."],"Sí, lo es."),C("Do you want water?","Yes, please.",["Yes, I do water.","No, I am water."],"Sí, por favor.")]},
 "Saludos":{tag:"general",words:[W("sorry","perdón / lo siento","heartpulse","Sorry, I am late.","Perdón, llego tarde.",1),W("welcome","bienvenido","home","Welcome to my house!","¡Bienvenido a mi casa!",1),
@@ -1789,8 +1789,8 @@ const EXT={
   W("twenty","veinte","#20","I have twenty books.","Tengo veinte libros."),W("hundred","cien","#100","One hundred people live here.","Aquí viven cien personas.")],
  gram:[G("I ___ ten years old.","am",["have","is"],"Tengo diez años."),G("She ___ eight.","is",["has","are"],"Ella tiene ocho años."),G("How ___ are you?","old",["many","years"],"¿Cuántos años tienes?")],
  chat:[C("How old are you?","I'm twenty.",["I have twenty.","I'm twenty years."],"Tengo veinte años."),C("How many apples do you want?","Three, please.",["Yes, three.","I am three."],"Tres, por favor.")]},
-"Familia":{tag:"family",words:[W("grandfather","abuelo","user","My grandfather is very old.","Mi abuelo es muy mayor.",1),W("uncle","tío","user","My uncle lives in Mexico.","Mi tío vive en México.",1),
-  W("aunt","tía","user","My aunt is a teacher.","Mi tía es profesora.",1),W("parents","padres","users","My parents are at home.","Mis padres están en casa.",1),W("cousin","primo / prima","user","My cousin plays the guitar.","Mi primo toca la guitarra.",1)],
+"Familia":{tag:"family",words:[W("grandfather","abuelo","grandfather","My grandfather is very old.","Mi abuelo es muy mayor.",1),W("uncle","tío","man","My uncle lives in Mexico.","Mi tío vive en México.",1),
+  W("aunt","tía","woman","My aunt is a teacher.","Mi tía es profesora.",1),W("parents","padres","users","My parents are at home.","Mis padres están en casa.",1),W("cousin","primo / prima","user","My cousin plays the guitar.","Mi primo toca la guitarra.",1)],
  gram:[G("This is Ana. ___ son is tall.","Her",["His","She"],"Esta es Ana. Su hijo es alto."),G("This is Tom. ___ sister sings.","His",["Her","He"],"Este es Tom. Su hermana canta."),G("We love ___ family.","our",["we","us"],"Amamos a nuestra familia.")],
  chat:[C("Do you have brothers or sisters?","Yes, I have one sister.",["Yes, I am one sister.","No, I have one."],"Sí, tengo una hermana."),C("Who is she?","She is my mother.",["He is my mother.","She is mother my."],"Es mi madre.")]},
 "Colores":{tag:"general",words:[W("brown","café / marrón","@#8B5A2B","My dog is brown.","Mi perro es café."),W("pink","rosa","@#F59AC0","She has a pink bag.","Ella tiene una bolsa rosa."),
@@ -1821,12 +1821,12 @@ const EXT={
   W("boots","botas","shoe","I need new boots for winter.","Necesito botas nuevas para el invierno.",1)],
  gram:[G("My pants ___ black.","are",["is","be"],"Mis pantalones son negros."),G("I ___ a hat in summer.","wear",["carry","dress"],"Uso sombrero en verano."),G("These shoes ___ new.","are",["is","am"],"Estos zapatos son nuevos.")],
  chat:[C("Can I try it on?","Of course. The fitting room is there.",["Of course. It's on.","Yes, you try."],"Claro. El probador está allí."),C("Do you have it in a smaller size?","Yes, here you are.",["Yes, it's small size.","No, it's a size."],"Sí, aquí tiene.")]},
-"Animales":{tag:"general",words:[W("duck","pato","bird","The duck swims in the lake.","El pato nada en el lago.",1),W("pig","cerdo","paw","The pig is pink.","El cerdo es rosado.",1),
-  W("sheep","oveja","paw","The sheep is white.","La oveja es blanca.",1),W("monkey","mono","paw","The monkey eats a banana.","El mono come un plátano.",1)],
+"Animales":{tag:"general",words:[W("duck","pato","bird","The duck swims in the lake.","El pato nada en el lago.",1),W("pig","cerdo","pig","The pig is pink.","El cerdo es rosado.",1),
+  W("sheep","oveja","sheep","The sheep is white.","La oveja es blanca.",1),W("monkey","mono","monkey","The monkey eats a banana.","El mono come un plátano.",1)],
  gram:[G("I have two ___.","mice",["mouses","mouse"],"Tengo dos ratones."),G("There are three ___ in the water.","fish",["fishs","fishes"],"Hay tres peces en el agua."),G("The ___ play in the park.","children",["childs","childrens"],"Los niños juegan en el parque.")],
  chat:[C("Do you have a pet?","Yes, I have a cat.",["Yes, I am a cat.","Yes, I have pet."],"Sí, tengo un gato."),C("What's your favorite animal?","I love elephants.",["I love animal.","It's favorite."],"Me encantan los elefantes.")]},
-"Cuerpo y salud":{tag:"general",words:[W("foot","pie","footprints","My foot hurts.","Me duele el pie.",1),W("nose","nariz","user","He has a big nose.","Él tiene la nariz grande.",1),
-  W("ear","oreja","headphones","My ear hurts.","Me duele la oreja.",1),W("tooth","diente","user","I have a bad tooth.","Tengo un diente mal.",1),W("hair","pelo / cabello","user","She has long hair.","Ella tiene el pelo largo.",1)],
+"Cuerpo y salud":{tag:"general",words:[W("foot","pie","footprints","My foot hurts.","Me duele el pie.",1),W("nose","nariz","nose","He has a big nose.","Él tiene la nariz grande.",1),
+  W("ear","oreja","headphones","My ear hurts.","Me duele la oreja.",1),W("tooth","diente","tooth","I have a bad tooth.","Tengo un diente mal.",1),W("hair","pelo / cabello","hair","She has long hair.","Ella tiene el pelo largo.",1)],
  gram:[G("My head ___.","hurts",["hurt","pains"],"Me duele la cabeza."),G("___ your hands before lunch.","Wash",["Washes","Washing"],"Lávate las manos antes de almorzar."),G("I ___ a doctor.","need",["needs","am need"],"Necesito un médico.")],
  chat:[C("What's wrong?","I have a headache.",["I have a head.","I am headache."],"Me duele la cabeza."),C("Do you feel better?","Yes, much better, thanks.",["Yes, much good, thanks.","Yes, I feel."],"Sí, mucho mejor, gracias.")]},
 "El clima":{tag:"travel",words:[W("sunny","soleado","sun","It is sunny today.","Hoy está soleado.",1),W("spring","primavera","leaf","Flowers grow in spring.","Las flores crecen en primavera.",1),
@@ -2423,7 +2423,7 @@ function mascot(mood="happy",skin){const sk=SKINS.find(x=>x.id===(skin||(window.
    ${brows}<g class="eyes"><ellipse cx="45" cy="52" rx="7" ry="9" fill="#1E1B2E"/><ellipse cx="75" cy="52" rx="7" ry="9" fill="#1E1B2E"/>
    <circle cx="47.5" cy="48.5" r="2.6" fill="#fff"/><circle cx="77.5" cy="48.5" r="2.6" fill="#fff"/></g>
    <ellipse cx="33" cy="66" rx="6" ry="4" fill="${sk.h}"/><ellipse cx="87" cy="66" rx="6" ry="4" fill="${sk.h}"/>${mouth}</svg>`;}
-const ASSET_V="20261124e";
+const ASSET_V="20261125a";
 function art(w){if(w.i[0]==="#")return `<span class="num">${w.i.slice(1)}</span>`;if(w.i[0]==="@")return `<span class="swatch" style="background:${w.i.slice(1)}"></span>`;return `<img src="icons/${w.i}.png?v=${ASSET_V}" alt="" class="ic-img" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display=''"><span style="display:none">${ic(w.i)}</span>`;}
 function toast(msg,icon="sparkle"){const t=$("toast");if(!t)return;t.innerHTML=ic(icon)+"<span>"+msg+"</span>";t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),Math.max(2600,String(msg).length*55));}
 function hideToast(){$("toast").classList.remove("show");}
