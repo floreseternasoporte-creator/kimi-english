@@ -215,7 +215,7 @@ nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card
 /* ---------- LESSON ---------- */
 #lesson{position:fixed;inset:0;z-index:50;background:var(--paper);display:flex;flex-direction:column;animation:rise .3s ease}
 @keyframes rise{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
-.l-top{display:flex;align-items:center;gap:12px;padding:16px;max-width:680px;width:100%;margin:0 auto}
+.l-top{display:flex;align-items:center;gap:12px;padding:calc(16px + env(safe-area-inset-top)) 16px 16px;max-width:680px;width:100%;margin:0 auto}
 .icon-btn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:var(--mute);transition:.15s}
 .icon-btn:hover{background:var(--paper2);color:var(--ink)}
 .bar{flex:1;height:16px;background:var(--track);border-radius:99px;overflow:hidden;position:relative}
